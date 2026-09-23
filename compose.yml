@@ -12,9 +12,17 @@
 # 포트는 브라우저·로컬 도구로 들어갈 것만 127.0.0.1 에 연다.
 name: a605
 
+# 모든 컨테이너 공통. json-file 을 쓰되 회전시켜 로컬 디스크를 지킨다.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
 services:
   postgres:
     image: postgres:17.11-alpine
+    logging: *logging
     environment:
       POSTGRES_DB: ssafydb
       POSTGRES_USER: ssafy
@@ -32,6 +40,7 @@ services:
 
   redis:
     image: redis:7.4.11-alpine
+    logging: *logging
     volumes:
       - redis-data:/data
     healthcheck:
@@ -43,6 +52,9 @@ services:
   backend:
     profiles: ["app"]
     build: ./backend
+    logging: *logging
+    labels:
+      logging.collect: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,20 +76,86 @@ services:
       # 비어 있으면 기동하지 않는 OAuth 등록값. 로컬에서는 test-support 로그인을 쓰므로 자리만 채운다.
       SSAFY_CLIENT_ID: ${SSAFY_CLIENT_ID:-local-unused}
       SSAFY_CLIENT_SECRET: ${SSAFY_CLIENT_SECRET:-local-unused}
+      # 콘솔 로그를 한 줄 JSON 으로. 필드 이름은 ai 의 JsonFormatter 와 같다.
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: logstash
     ports:
       - "127.0.0.1:8080:8080"
 
   ai:
     profiles: ["app"]
     build: ./ai
+    logging: *logging
+    labels:
+      logging.collect: "true"
     env_file:
       - path: ./ai/.env
         required: false
     environment:
       AI_ENV: local
+      AI_LOG_FORMAT: json
     ports:
       - "127.0.0.1:8000:8000"
+
+  # ── monitoring ───────────────────────────────────────────────────────────────
+
+  # Alloy 가 docker.sock 을 직접 갖지 않는다. 컨테이너 조회·로그 읽기(GET)만 통과시킨다.
+  socket-proxy:
+    profiles: ["monitoring"]
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    logging: *logging
+    environment:
+      CONTAINERS: 1
+      NETWORKS: 1 # discovery.docker 가 네트워크 라벨을 계산할 때 조회한다
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  alloy:
+    profiles: ["monitoring"]
+    image: grafana/alloy:v1.19.2
+    logging: *logging
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      # 로그 읽은 위치(positions)·WAL 을 재기동 너머로 보존한다. 없으면 재기동마다 로그를 다시 읽는다.
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./infra/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
+    depends_on: [socket-proxy, loki]
+    ports:
+      - "127.0.0.1:12345:12345"
+
+  loki:
+    profiles: ["monitoring"]
+    image: grafana/loki:3.7.8
+    logging: *logging
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./infra/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+
+  grafana:
+    profiles: ["monitoring"]
+    image: grafana/grafana:13.2.2
+    logging: *logging
+    environment:
+      # 로컬 학습용 — 로그인 없이 Admin. 포트가 127.0.0.1 에만 열려 있어서 허용한다.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      # 3000 은 호스트의 frontend(pnpm dev)가 쓴다.
+      - "127.0.0.1:3001:3000"
 
 volumes:
   postgres-data:
   redis-data:
+  alloy-data:
+  loki-data:
+  grafana-data:

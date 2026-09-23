@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"  # noqa: S104 — 컨테이너 안에서 외부 바인딩이 필요하다
     port: int = 8000
     log_level: str = "INFO"
+    #: json 이면 한 줄 JSON 으로 낸다 (컨테이너 → Loki). 개발(uv run)은 기본 text 그대로다.
+    log_format: Literal["text", "json"] = "text"
     internal_api_key: str = ""
 
     #: 비우면 CORS 미들웨어를 아예 붙이지 않는다. 내부 서비스의 기본값이다.

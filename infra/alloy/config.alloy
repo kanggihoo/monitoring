@@ -1,0 +1,62 @@
+// 수집기 하나가 로그·메트릭·트레이스를 모두 받는다. 지금은 로그만.
+// 파이프라인 그림: http://127.0.0.1:12345
+
+// ── 로그: stdout(JSON) → Docker → socket-proxy → 여기 → Loki ─────────────────
+
+// logging.collect=true 라벨을 단 컨테이너만 가져간다 (수집 선언).
+discovery.docker "logs" {
+  host             = "tcp://socket-proxy:2375"
+  refresh_interval = "10s"
+  filter {
+    name   = "label"
+    values = ["logging.collect=true"]
+  }
+}
+
+// 라벨은 값 종류가 적은 것만 둔다: service(여기) · env(loki.write) · level(loki.process).
+discovery.relabel "logs" {
+  targets = []
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "tcp://socket-proxy:2375"
+  targets       = discovery.docker.logs.targets
+  relabel_rules = discovery.relabel.logs.rules
+  forward_to    = [loki.process.app.receiver]
+}
+
+loki.process "app" {
+  // backend(Spring logstash)와 ai(JsonFormatter)가 같은 필드 이름을 쓴다.
+  stage.json {
+    expressions = { level = "", message = "", trace_id = "", span_id = "" }
+  }
+
+  // 헬스체크 요청 로그는 버린다 (ai 컨테이너 HEALTHCHECK 가 30초마다 /health 를 부른다).
+  stage.drop {
+    source              = "message"
+    expression          = ".*\"GET /(health|actuator)[^\"]*\".*"
+    drop_counter_reason = "healthcheck"
+  }
+
+  stage.labels {
+    values = { level = "" }
+  }
+
+  // 트레이스 ID 는 값 종류가 무한하다 — 라벨로 올리면 스트림이 폭발한다.
+  stage.structured_metadata {
+    values = { trace_id = "", span_id = "" }
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+  external_labels = { env = "local" }
+}
