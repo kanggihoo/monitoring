@@ -1,0 +1,64 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# 패키지 매니저는 pnpm 하나다 (package.json packageManager). npm/yarn 이 남긴 락파일은 커밋하지 않는다.
+package-lock.json
+yarn.lock
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+*storybook.log
+storybook-static
+
+# playwright
+/test-results
+/playwright-report
+/blob-report
+/.playwright
+
+# playwright: 로그인 후 저장한 세션 (test:e2e:auth)
+/e2e/.auth/
+# playwright: test-support 로 발급한 실서버 세션 (globalSetup)
+/e2e-live/.auth/
+
+# 디자인 점검용 캡처 (pnpm shots). 로그(design-review/log.md)만 커밋한다.
+/design-review/shots/

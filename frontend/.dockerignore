@@ -1,0 +1,23 @@
+# 빌드 컨텍스트에서 제외한다.
+#
+# node_modules 를 제외하는 것이 특히 중요하다 (441MB):
+#   - 컨텍스트 전송이 느려진다
+#   - 호스트(Windows/x64)에서 설치된 네이티브 모듈이 컨테이너(linux/musl) 것을 덮어써
+#     플랫폼 불일치 오류가 날 수 있다
+# deps 스테이지가 컨테이너 안에서 새로 설치한다.
+
+node_modules
+.next
+out
+
+Dockerfile
+.dockerignore
+.git
+.gitignore
+
+.env
+.env.local
+
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store

@@ -1,0 +1,233 @@
+[
+  {
+    "id": "ALIAS_PEAKBUY_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_BUY"
+    },
+    "text": "꼭대기 수집"
+  },
+  {
+    "id": "ALIAS_PEAKBUY_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_BUY"
+    },
+    "text": "정점 입장"
+  },
+  {
+    "id": "ALIAS_PEAKBUY_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_BUY"
+    },
+    "text": "뒤늦은 합류"
+  },
+  {
+    "id": "ALIAS_PEAKBUY_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_BUY"
+    },
+    "text": "비싼 첫걸음"
+  },
+  {
+    "id": "ALIAS_BOTTOMSELL_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_SELL"
+    },
+    "text": "바닥 세일"
+  },
+  {
+    "id": "ALIAS_BOTTOMSELL_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_SELL"
+    },
+    "text": "한 발 먼저"
+  },
+  {
+    "id": "ALIAS_BOTTOMSELL_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_SELL"
+    },
+    "text": "조기 하차"
+  },
+  {
+    "id": "ALIAS_BOTTOMSELL_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_SELL"
+    },
+    "text": "아쉬운 작별"
+  },
+  {
+    "id": "ALIAS_BOTTOMBUY_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_BUY"
+    },
+    "text": "바닥 줍기"
+  },
+  {
+    "id": "ALIAS_BOTTOMBUY_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_BUY"
+    },
+    "text": "제때 승차"
+  },
+  {
+    "id": "ALIAS_BOTTOMBUY_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_BUY"
+    },
+    "text": "낮은 자리"
+  },
+  {
+    "id": "ALIAS_BOTTOMBUY_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BOTTOM_BUY"
+    },
+    "text": "반등 직전"
+  },
+  {
+    "id": "ALIAS_PEAKSELL_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_SELL"
+    },
+    "text": "정점 하차"
+  },
+  {
+    "id": "ALIAS_PEAKSELL_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_SELL"
+    },
+    "text": "때맞춘 작별"
+  },
+  {
+    "id": "ALIAS_PEAKSELL_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_SELL"
+    },
+    "text": "직전 탈출"
+  },
+  {
+    "id": "ALIAS_PEAKSELL_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "PEAK_SELL"
+    },
+    "text": "마지막 고가"
+  },
+  {
+    "id": "ALIAS_NEUTRAL_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "NEUTRAL"
+    },
+    "text": "평범한 한 수"
+  },
+  {
+    "id": "ALIAS_NEUTRAL_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "NEUTRAL"
+    },
+    "text": "보통의 선택"
+  },
+  {
+    "id": "ALIAS_NEUTRAL_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "NEUTRAL"
+    },
+    "text": "무난한 매매"
+  },
+  {
+    "id": "ALIAS_NEUTRAL_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "NEUTRAL"
+    },
+    "text": "조용한 한 건"
+  },
+  {
+    "id": "ALIAS_BESTTRADE_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BEST_TRADE"
+    },
+    "text": "오늘의 한 수"
+  },
+  {
+    "id": "ALIAS_BESTTRADE_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BEST_TRADE"
+    },
+    "text": "제일 잘한 작별"
+  },
+  {
+    "id": "ALIAS_BESTTRADE_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BEST_TRADE"
+    },
+    "text": "가장 큰 수확"
+  },
+  {
+    "id": "ALIAS_BESTTRADE_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "BEST_TRADE"
+    },
+    "text": "때를 만난 매도"
+  },
+  {
+    "id": "ALIAS_WORSTTRADE_1",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "WORST_TRADE"
+    },
+    "text": "가장 아픈 자리"
+  },
+  {
+    "id": "ALIAS_WORSTTRADE_2",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "WORST_TRADE"
+    },
+    "text": "오늘의 쓴 매도"
+  },
+  {
+    "id": "ALIAS_WORSTTRADE_3",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "WORST_TRADE"
+    },
+    "text": "제일 비싼 후퇴"
+  },
+  {
+    "id": "ALIAS_WORSTTRADE_4",
+    "slot": "trade_alias",
+    "when": {
+      "tag": "WORST_TRADE"
+    },
+    "text": "아쉬운 마무리"
+  },
+  {
+    "id": "ALIAS_FALLBACK",
+    "slot": "trade_alias",
+    "when": {},
+    "fallback": true,
+    "text": "기록된 한 건"
+  }
+]

@@ -1,0 +1,177 @@
+﻿date,market,country,day_of_week,day_of_week_ko,name_ko,name_en,holiday_type,is_trading_day
+2020-01-01,KRX,KR,Wednesday,수,신정 (새해 첫날),New Year's Day,REGULAR,False
+2020-01-01,NYSE,US,Wednesday,수,신정 (새해 첫날),New Years Day,REGULAR,False
+2020-01-20,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2020-01-24,KRX,KR,Friday,금,설날 연휴 (전날),Seollal (New Year's Day by the lunar) (-1 day),REGULAR,False
+2020-01-27,KRX,KR,Monday,월,설날 연휴 (다음날),Seollal (New Year's Day by the lunar) (+1 day),REGULAR,False
+2020-02-17,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2020-04-10,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2020-04-15,KRX,KR,Wednesday,수,제21대 국회의원 선거일,21st National Assembly Election,ELECTION,False
+2020-04-30,KRX,KR,Thursday,목,부처님오신날,Buddha's Birthday,REGULAR,False
+2020-05-01,KRX,KR,Friday,금,근로자의 날 (5월 1일),Labor Day,REGULAR,False
+2020-05-05,KRX,KR,Tuesday,화,어린이날,Children's Day,REGULAR,False
+2020-05-25,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2020-07-03,NYSE,US,Friday,금,미국 독립기념일,July 4th,REGULAR,False
+2020-08-17,KRX,KR,Monday,월,임시공휴일 (광복절 대체),Temporary Holiday (Liberation Day),ADHOC,False
+2020-09-07,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2020-09-30,KRX,KR,Wednesday,수,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2020-10-01,KRX,KR,Thursday,목,추석,Chuseok (Korean Thanksgiving Day),REGULAR,False
+2020-10-02,KRX,KR,Friday,금,추석 연휴 (다음날),Chuseok (Korean Thanksgiving Day) (+1 day),REGULAR,False
+2020-10-09,KRX,KR,Friday,금,한글날,Hangul Proclamation Day,REGULAR,False
+2020-11-26,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2020-12-25,KRX,KR,Friday,금,성탄절 (크리스마스),Christmas,REGULAR,False
+2020-12-25,NYSE,US,Friday,금,성탄절 (크리스마스),Christmas,REGULAR,False
+2020-12-31,KRX,KR,Thursday,목,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False
+2021-01-01,KRX,KR,Friday,금,신정 (새해 첫날),New Year's Day,REGULAR,False
+2021-01-01,NYSE,US,Friday,금,신정 (새해 첫날),New Years Day,REGULAR,False
+2021-01-18,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2021-02-11,KRX,KR,Thursday,목,설날 연휴 (전날),Seollal (New Year's Day by the lunar) (-1 day),REGULAR,False
+2021-02-12,KRX,KR,Friday,금,설날,Seollal (New Year's Day by the lunar),REGULAR,False
+2021-02-15,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2021-03-01,KRX,KR,Monday,월,3·1절,Independence Movement Day,REGULAR,False
+2021-04-02,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2021-05-05,KRX,KR,Wednesday,수,어린이날,Children's Day,REGULAR,False
+2021-05-19,KRX,KR,Wednesday,수,부처님오신날,Buddha's Birthday,REGULAR,False
+2021-05-31,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2021-07-05,NYSE,US,Monday,월,미국 독립기념일,July 4th,REGULAR,False
+2021-08-16,KRX,KR,Monday,월,광복절,National Liberation Day,REGULAR,False
+2021-09-06,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2021-09-20,KRX,KR,Monday,월,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2021-09-21,KRX,KR,Tuesday,화,추석,Chuseok (Korean Thanksgiving Day),REGULAR,False
+2021-09-22,KRX,KR,Wednesday,수,추석 연휴 (다음날),Chuseok (Korean Thanksgiving Day) (+1 day),REGULAR,False
+2021-10-04,KRX,KR,Monday,월,개천절,Korean National Foundation Day,REGULAR,False
+2021-10-11,KRX,KR,Monday,월,한글날,Hangul Proclamation Day,REGULAR,False
+2021-11-25,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2021-12-24,NYSE,US,Friday,금,성탄절 (크리스마스),Christmas,REGULAR,False
+2021-12-31,KRX,KR,Friday,금,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False
+2022-01-17,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2022-01-31,KRX,KR,Monday,월,설날 연휴 (전날),Seollal (New Year's Day by the lunar) (-1 day),REGULAR,False
+2022-02-01,KRX,KR,Tuesday,화,설날,Seollal (New Year's Day by the lunar),REGULAR,False
+2022-02-02,KRX,KR,Wednesday,수,설날 연휴 (다음날),Seollal (New Year's Day by the lunar) (+1 day),REGULAR,False
+2022-02-21,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2022-03-01,KRX,KR,Tuesday,화,3·1절,Independence Movement Day,REGULAR,False
+2022-03-09,KRX,KR,Wednesday,수,제20대 대통령 선거일,20th Presidential Election,ELECTION,False
+2022-04-15,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2022-05-05,KRX,KR,Thursday,목,어린이날,Children's Day,REGULAR,False
+2022-05-30,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2022-06-01,KRX,KR,Wednesday,수,제8회 전국동시지방선거일,8th Nationwide Local Election,ELECTION,False
+2022-06-06,KRX,KR,Monday,월,현충일,Memorial Day,REGULAR,False
+2022-06-20,NYSE,US,Monday,월,준틴스 데이 (노예해방의 날),Juneteenth Starting at 2022,REGULAR,False
+2022-07-04,NYSE,US,Monday,월,미국 독립기념일,July 4th,REGULAR,False
+2022-08-15,KRX,KR,Monday,월,광복절,National Liberation Day,REGULAR,False
+2022-09-05,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2022-09-09,KRX,KR,Friday,금,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2022-09-12,KRX,KR,Monday,월,추석 연휴 (다음날),Chuseok (Korean Thanksgiving Day) (+1 day),REGULAR,False
+2022-10-03,KRX,KR,Monday,월,개천절,Korean National Foundation Day,REGULAR,False
+2022-10-10,KRX,KR,Monday,월,한글날,Hangul Proclamation Day,REGULAR,False
+2022-11-24,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2022-12-26,NYSE,US,Monday,월,성탄절 (크리스마스),Christmas,REGULAR,False
+2022-12-30,KRX,KR,Friday,금,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False
+2023-01-02,NYSE,US,Monday,월,신정 (새해 첫날),New Years Day,REGULAR,False
+2023-01-16,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2023-01-23,KRX,KR,Monday,월,설날,Seollal (New Year's Day by the lunar),REGULAR,False
+2023-01-24,KRX,KR,Tuesday,화,설날 연휴 (다음날),Seollal (New Year's Day by the lunar) (+1 day),REGULAR,False
+2023-02-20,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2023-03-01,KRX,KR,Wednesday,수,3·1절,Independence Movement Day,REGULAR,False
+2023-04-07,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2023-05-01,KRX,KR,Monday,월,근로자의 날 (5월 1일),Labor Day,REGULAR,False
+2023-05-05,KRX,KR,Friday,금,어린이날,Children's Day,REGULAR,False
+2023-05-29,KRX,KR,Monday,월,부처님오신날 대체공휴일,Buddha's Birthday Substitute Holiday,SUBSTITUTE,False
+2023-05-29,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2023-06-06,KRX,KR,Tuesday,화,현충일,Memorial Day,REGULAR,False
+2023-06-19,NYSE,US,Monday,월,준틴스 데이 (노예해방의 날),Juneteenth Starting at 2022,REGULAR,False
+2023-07-04,NYSE,US,Tuesday,화,미국 독립기념일,July 4th,REGULAR,False
+2023-08-15,KRX,KR,Tuesday,화,광복절,National Liberation Day,REGULAR,False
+2023-09-04,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2023-09-28,KRX,KR,Thursday,목,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2023-09-29,KRX,KR,Friday,금,추석,Chuseok (Korean Thanksgiving Day),REGULAR,False
+2023-10-02,KRX,KR,Monday,월,임시공휴일 (추석-개천절 징검다리),Temporary Holiday,ADHOC,False
+2023-10-03,KRX,KR,Tuesday,화,개천절,Korean National Foundation Day,REGULAR,False
+2023-10-09,KRX,KR,Monday,월,한글날,Hangul Proclamation Day,REGULAR,False
+2023-11-23,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2023-12-25,KRX,KR,Monday,월,성탄절 (크리스마스),Christmas,REGULAR,False
+2023-12-25,NYSE,US,Monday,월,성탄절 (크리스마스),Christmas,REGULAR,False
+2023-12-29,KRX,KR,Friday,금,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False
+2024-01-01,KRX,KR,Monday,월,신정 (새해 첫날),New Year's Day,REGULAR,False
+2024-01-01,NYSE,US,Monday,월,신정 (새해 첫날),New Years Day,REGULAR,False
+2024-01-15,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2024-02-09,KRX,KR,Friday,금,설날 연휴 (전날),Seollal (New Year's Day by the lunar) (-1 day),REGULAR,False
+2024-02-12,KRX,KR,Monday,월,설날 연휴 (다음날),Seollal (New Year's Day by the lunar) (+1 day),REGULAR,False
+2024-02-19,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2024-03-01,KRX,KR,Friday,금,3·1절,Independence Movement Day,REGULAR,False
+2024-03-29,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2024-04-10,KRX,KR,Wednesday,수,제22대 국회의원 선거일,22nd National Assembly Election,ELECTION,False
+2024-05-01,KRX,KR,Wednesday,수,근로자의 날 (5월 1일),Labor Day,REGULAR,False
+2024-05-06,KRX,KR,Monday,월,어린이날,Children's Day,REGULAR,False
+2024-05-15,KRX,KR,Wednesday,수,부처님오신날,Buddha's Birthday,REGULAR,False
+2024-05-27,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2024-06-06,KRX,KR,Thursday,목,현충일,Memorial Day,REGULAR,False
+2024-06-19,NYSE,US,Wednesday,수,준틴스 데이 (노예해방의 날),Juneteenth Starting at 2022,REGULAR,False
+2024-07-04,NYSE,US,Thursday,목,미국 독립기념일,July 4th,REGULAR,False
+2024-08-15,KRX,KR,Thursday,목,광복절,National Liberation Day,REGULAR,False
+2024-09-02,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2024-09-16,KRX,KR,Monday,월,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2024-09-17,KRX,KR,Tuesday,화,추석,Chuseok (Korean Thanksgiving Day),REGULAR,False
+2024-09-18,KRX,KR,Wednesday,수,추석 연휴 (다음날),Chuseok (Korean Thanksgiving Day) (+1 day),REGULAR,False
+2024-10-01,KRX,KR,Tuesday,화,국군의 날 임시공휴일,Armed Forces Day Temporary Holiday,ADHOC,False
+2024-10-03,KRX,KR,Thursday,목,개천절,Korean National Foundation Day,REGULAR,False
+2024-10-09,KRX,KR,Wednesday,수,한글날,Hangul Proclamation Day,REGULAR,False
+2024-11-28,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2024-12-25,KRX,KR,Wednesday,수,성탄절 (크리스마스),Christmas,REGULAR,False
+2024-12-25,NYSE,US,Wednesday,수,성탄절 (크리스마스),Christmas,REGULAR,False
+2024-12-31,KRX,KR,Tuesday,화,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False
+2025-01-01,KRX,KR,Wednesday,수,신정 (새해 첫날),New Year's Day,REGULAR,False
+2025-01-01,NYSE,US,Wednesday,수,신정 (새해 첫날),New Years Day,REGULAR,False
+2025-01-09,NYSE,US,Thursday,목,지미 카터 전 대통령 국가 애도의 날,Jimmy Carter National Day of Mourning,SPECIAL,False
+2025-01-20,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2025-01-27,KRX,KR,Monday,월,설날 연휴 대체공휴일,Lunar New Year Substitute Holiday,SUBSTITUTE,False
+2025-01-28,KRX,KR,Tuesday,화,설날 연휴 (전날),Seollal (New Year's Day by the lunar) (-1 day),REGULAR,False
+2025-01-29,KRX,KR,Wednesday,수,설날,Seollal (New Year's Day by the lunar),REGULAR,False
+2025-01-30,KRX,KR,Thursday,목,설날 연휴 (다음날),Seollal (New Year's Day by the lunar) (+1 day),REGULAR,False
+2025-02-17,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2025-03-03,KRX,KR,Monday,월,3·1절,Independence Movement Day,REGULAR,False
+2025-04-18,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2025-05-01,KRX,KR,Thursday,목,근로자의 날 (5월 1일),Labor Day,REGULAR,False
+2025-05-05,KRX,KR,Monday,월,부처님오신날,Buddha's Birthday,REGULAR,False
+2025-05-06,KRX,KR,Tuesday,화,어린이날,Children's Day,REGULAR,False
+2025-05-26,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2025-06-03,KRX,KR,Tuesday,화,대체공휴일,Substitute Holiday,SUBSTITUTE,False
+2025-06-06,KRX,KR,Friday,금,현충일,Memorial Day,REGULAR,False
+2025-06-19,NYSE,US,Thursday,목,준틴스 데이 (노예해방의 날),Juneteenth Starting at 2022,REGULAR,False
+2025-07-04,NYSE,US,Friday,금,미국 독립기념일,July 4th,REGULAR,False
+2025-08-15,KRX,KR,Friday,금,광복절,National Liberation Day,REGULAR,False
+2025-09-01,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2025-10-03,KRX,KR,Friday,금,개천절,Korean National Foundation Day,REGULAR,False
+2025-10-06,KRX,KR,Monday,월,추석,Chuseok (Korean Thanksgiving Day),REGULAR,False
+2025-10-07,KRX,KR,Tuesday,화,추석 연휴 (다음날),Chuseok (Korean Thanksgiving Day) (+1 day),REGULAR,False
+2025-10-08,KRX,KR,Wednesday,수,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2025-10-09,KRX,KR,Thursday,목,한글날,Hangul Proclamation Day,REGULAR,False
+2025-11-27,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2025-12-25,KRX,KR,Thursday,목,성탄절 (크리스마스),Christmas,REGULAR,False
+2025-12-25,NYSE,US,Thursday,목,성탄절 (크리스마스),Christmas,REGULAR,False
+2025-12-31,KRX,KR,Wednesday,수,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False
+2026-01-01,KRX,KR,Thursday,목,신정 (새해 첫날),New Year's Day,REGULAR,False
+2026-01-01,NYSE,US,Thursday,목,신정 (새해 첫날),New Years Day,REGULAR,False
+2026-01-19,NYSE,US,Monday,월,마틴 루터 킹 주니어의 날,Dr. Martin Luther King Jr. Day,REGULAR,False
+2026-02-16,KRX,KR,Monday,월,설날 연휴 (전날),Seollal (New Year's Day by the lunar) (-1 day),REGULAR,False
+2026-02-16,NYSE,US,Monday,월,대통령의 날 (워싱턴 탄생일),Presidents Day,REGULAR,False
+2026-02-17,KRX,KR,Tuesday,화,설날,Seollal (New Year's Day by the lunar),REGULAR,False
+2026-02-18,KRX,KR,Wednesday,수,설날 연휴 (다음날),Seollal (New Year's Day by the lunar) (+1 day),REGULAR,False
+2026-03-02,KRX,KR,Monday,월,3·1절,Independence Movement Day,REGULAR,False
+2026-04-03,NYSE,US,Friday,금,성금요일 (Good Friday),Good Friday 1908+,REGULAR,False
+2026-05-01,KRX,KR,Friday,금,근로자의 날 (5월 1일),Labor Day,REGULAR,False
+2026-05-05,KRX,KR,Tuesday,화,어린이날,Children's Day,REGULAR,False
+2026-05-25,KRX,KR,Monday,월,부처님오신날 대체공휴일,Buddha's Birthday Substitute Holiday,SUBSTITUTE,False
+2026-05-25,NYSE,US,Monday,월,메모리얼 데이 (전몰장병 추모일),Memorial Day,REGULAR,False
+2026-06-19,NYSE,US,Friday,금,준틴스 데이 (노예해방의 날),Juneteenth Starting at 2022,REGULAR,False
+2026-07-03,NYSE,US,Friday,금,미국 독립기념일,July 4th,REGULAR,False
+2026-08-17,KRX,KR,Monday,월,광복절,National Liberation Day,REGULAR,False
+2026-09-07,NYSE,US,Monday,월,노동절 (Labor Day),Labor Day,REGULAR,False
+2026-09-24,KRX,KR,Thursday,목,추석 연휴 (전날),Chuseok (Korean Thanksgiving Day) (-1 day),REGULAR,False
+2026-09-25,KRX,KR,Friday,금,추석,Chuseok (Korean Thanksgiving Day),REGULAR,False
+2026-10-05,KRX,KR,Monday,월,개천절,Korean National Foundation Day,REGULAR,False
+2026-10-09,KRX,KR,Friday,금,한글날,Hangul Proclamation Day,REGULAR,False
+2026-11-26,NYSE,US,Thursday,목,추수감사절 (Thanksgiving Day),Thanksgiving,REGULAR,False
+2026-12-25,KRX,KR,Friday,금,성탄절 (크리스마스),Christmas,REGULAR,False
+2026-12-25,NYSE,US,Friday,금,성탄절 (크리스마스),Christmas,REGULAR,False
+2026-12-31,KRX,KR,Thursday,목,연말 휴장일 (12월 31일),End of Year Holiday,REGULAR,False

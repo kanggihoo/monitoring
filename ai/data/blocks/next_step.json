@@ -1,0 +1,99 @@
+[
+  {
+    "id": "NEXT_INVESTED_H",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "INVESTED",
+      "nextDirection": "H"
+    },
+    "text": "지금까지는 많이 넣는 쪽이었습니다. 앞으로는 조금 더 남겨 두고 가 보세요."
+  },
+  {
+    "id": "NEXT_INVESTED_L",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "INVESTED",
+      "nextDirection": "L"
+    },
+    "text": "지금까지는 현금을 넉넉히 두는 쪽이었습니다. 앞으로는 한 자리만 더 실어 보세요."
+  },
+  {
+    "id": "NEXT_DRAWDOWN_H",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "DRAWDOWN",
+      "nextDirection": "H"
+    },
+    "text": "지금까지는 큰 하락을 안고 가는 쪽이었습니다. 앞으로는 한 번쯤 덜어내 보세요."
+  },
+  {
+    "id": "NEXT_DRAWDOWN_L",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "DRAWDOWN",
+      "nextDirection": "L"
+    },
+    "text": "지금까지는 일찍 움직이는 쪽이었습니다. 앞으로는 한 번은 버텨 보면 어떻게 되는지 보세요."
+  },
+  {
+    "id": "NEXT_ENTRY_H",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "ENTRY",
+      "nextDirection": "H"
+    },
+    "text": "지금까지는 오르는 흐름을 따라가는 쪽이었습니다. 앞으로는 빠진 자리도 한 번 담아 보세요."
+  },
+  {
+    "id": "NEXT_ENTRY_L",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "ENTRY",
+      "nextDirection": "L"
+    },
+    "text": "지금까지는 빠진 자리를 노리는 쪽이었습니다. 앞으로는 이미 오른 자리도 한 번 따라가 보세요."
+  },
+  {
+    "id": "NEXT_DIP_H",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "DIP",
+      "nextDirection": "H"
+    },
+    "text": "지금까지는 떨어질 때 더 담는 쪽이었습니다. 앞으로는 한 번은 지켜보기만 해 보세요."
+  },
+  {
+    "id": "NEXT_DIP_L",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "DIP",
+      "nextDirection": "L"
+    },
+    "text": "지금까지는 떨어질 때 덜어내는 쪽이었습니다. 앞으로는 한 번쯤 그대로 두고 보세요."
+  },
+  {
+    "id": "NEXT_STOP_H",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "STOP",
+      "nextDirection": "H"
+    },
+    "text": "지금까지는 손실을 오래 안고 가는 쪽이었습니다. 앞으로는 정한 선에서 한 번 끊어 보세요."
+  },
+  {
+    "id": "NEXT_STOP_L",
+    "slot": "next_step",
+    "when": {
+      "nextItem": "STOP",
+      "nextDirection": "L"
+    },
+    "text": "지금까지는 손실을 빨리 끊는 쪽이었습니다. 앞으로는 한 번쯤 기다렸다면 어땠을지 확인해 보세요."
+  },
+  {
+    "id": "NEXT_FALLBACK",
+    "slot": "next_step",
+    "when": {},
+    "fallback": true,
+    "text": "지금까지는 습관이 드러나기에 짧았습니다. 앞으로는 조금 더 움직여 보시면 어떤 사람인지 보일 겁니다."
+  }
+]

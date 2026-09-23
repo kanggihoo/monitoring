@@ -1,0 +1,56 @@
+[project]
+name = "ai"
+version = "0.1.0"
+description = "S15P21A605 AI 컨텍스트 — Spring 백엔드가 호출하는 내부 FastAPI 서비스"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "httpx2>=2.12",
+]
+
+# 애플리케이션이므로 배포 가능한 패키지로 빌드하지 않는다 (uv virtual project).
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+# uv virtual project 라서 `app` 이 site-packages 에 설치되지 않는다. 루트를 import path 에 넣는다.
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+# 기본 출력을 짧게 잡는다. 헤더와 긴 트레이스백은 원인을 볼 때만 필요한데, 평소에 찍히면
+# 스크롤이고 에이전트가 읽을 때는 그대로 토큰이다. 더 줄이려면 `scripts/check.sh`.
+# 원인을 볼 때는 `uv run pytest --tb=long --show-capture=all` 로 덮어쓴다.
+addopts = ["-q", "--no-header", "--tb=short"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+# ruff 0.16 부터 마크다운 안의 파이썬 코드 블록도 서식을 잡는다. 문서의 코드 블록은 값을
+# 세로로 맞춰 읽히게 쓴 자리가 있어서, `check.sh --fix` 가 문서를 조용히 고쳐 놓는다.
+# 문서는 사람이 쓰고 사람이 읽는다 — 서식 검사 대상에서 뺀다.
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "UP",     # pyupgrade
+    "ASYNC",  # flake8-async
+    "S",      # flake8-bandit
+    "RUF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # 테스트에서 assert 는 정상이다

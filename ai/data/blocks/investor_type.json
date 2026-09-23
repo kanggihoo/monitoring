@@ -1,0 +1,92 @@
+[
+  {
+    "id": "LEVEL_1",
+    "slot": "investor_type",
+    "when": {
+      "profileLevel": 1
+    },
+    "emoji": "🛡️",
+    "name": "철벽의 자산 방어자",
+    "oneLine": "지킬 것을 먼저 챙기고, 흔들릴 자리에는 발을 들이지 않습니다",
+    "text": "현금을 넉넉히 두고 손실은 빨리 끊습니다. 잃지 않는 쪽을 먼저 봅니다.",
+    "strength": "크게 잃지 않습니다",
+    "caution": "기회가 지나가는 것도 함께 봅니다"
+  },
+  {
+    "id": "LEVEL_2",
+    "slot": "investor_type",
+    "when": {
+      "profileLevel": 2
+    },
+    "emoji": "🔍",
+    "name": "돌다리 두드리는 분석가",
+    "oneLine": "확인하고 들어가고, 아니다 싶으면 오래 붙들지 않습니다",
+    "text": "충분히 살펴본 자리만 담고 위험을 나눠 집니다. 서두르지 않습니다.",
+    "strength": "무리한 자리를 피합니다",
+    "caution": "재는 사이에 자리가 지나갑니다"
+  },
+  {
+    "id": "LEVEL_3",
+    "slot": "investor_type",
+    "when": {
+      "profileLevel": 3
+    },
+    "emoji": "⚖️",
+    "name": "유연한 자산 조율사",
+    "oneLine": "한쪽으로 치우치지 않고 상황에 맞춰 옮겨 담습니다",
+    "text": "지킬 자리와 걸 자리를 나눠 둡니다. 과열되면 덜어냅니다.",
+    "strength": "어느 장에서도 크게 흔들리지 않습니다",
+    "caution": "뚜렷한 색이 덜 드러납니다"
+  },
+  {
+    "id": "LEVEL_4",
+    "slot": "investor_type",
+    "when": {
+      "profileLevel": 4
+    },
+    "emoji": "⚡",
+    "name": "변동성을 즐기는 트레이더",
+    "oneLine": "움직이는 자리를 좋아하고, 기회가 보이면 바로 싣습니다",
+    "text": "흔들리는 자리에서 기회를 찾습니다. 손이 빠른 편입니다.",
+    "strength": "오는 자리를 놓치지 않습니다",
+    "caution": "빠진 자리가 더 빠질 수 있습니다"
+  },
+  {
+    "id": "LEVEL_5",
+    "slot": "investor_type",
+    "when": {
+      "profileLevel": 5
+    },
+    "emoji": "🎯",
+    "name": "한 방을 노리는 승부사",
+    "oneLine": "한 번에 크게 걸고, 결과도 크게 받습니다",
+    "text": "현금을 남기지 않고 큰 폭의 등락을 감수합니다. 물러서지 않습니다.",
+    "strength": "크게 벌 자리를 놓치지 않습니다",
+    "caution": "한 번의 하락이 크게 남습니다"
+  },
+  {
+    "id": "LEVEL_UNDETERMINED",
+    "slot": "investor_type",
+    "when": {
+      "profileLevel": null
+    },
+    "emoji": "🌫️",
+    "name": "아직 그리는 중",
+    "oneLine": "아직 성향이 드러나기에는 거래가 많지 않았습니다",
+    "text": "모습이 드러나기에 짧았습니다. 거래가 쌓이면 다시 봅니다.",
+    "strength": "서두르지 않았습니다",
+    "caution": "움직이지 않으면 배울 것도 적습니다"
+  },
+  {
+    "id": "TYPE_FALLBACK",
+    "slot": "investor_type",
+    "when": {},
+    "fallback": true,
+    "emoji": "🌫️",
+    "name": "아직 그리는 중",
+    "oneLine": "아직 모습이 드러나기에는 거래가 많지 않았습니다",
+    "text": "모습이 드러나기에 짧았습니다. 거래가 쌓이면 다시 봅니다.",
+    "strength": "서두르지 않았습니다",
+    "caution": "움직이지 않으면 배울 것도 적습니다"
+  }
+]

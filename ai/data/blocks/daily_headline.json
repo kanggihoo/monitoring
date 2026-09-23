@@ -1,0 +1,414 @@
+[
+  {
+    "id": "HEAD_ABOVE_PEAKBUY_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "이긴 날에도 아쉬운 손이 하나 있었습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_PEAKBUY_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "성적은 좋았고, 타이밍은 한 번 어긋났습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_PEAKBUY_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "앞선 하루였지만 꼭대기를 한 번 밟았습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_BOTTOMSELL_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "이긴 날인데 놓아버린 것이 남습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_BOTTOMSELL_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "앞서 있었고, 판 자리가 아쉬웠습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_BOTTOMSELL_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "잘한 날의 유일한 미련은 매도 버튼이었습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_OVERTRADE_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "손이 바빴고 결과도 따라온 날입니다."
+  },
+  {
+    "id": "HEAD_ABOVE_OVERTRADE_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "많이 눌렀고, 그중 몇 개가 맞았습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_OVERTRADE_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "분주함이 이번에는 편을 들어줬습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_QUIET_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "QUIET"
+    },
+    "text": "아무것도 하지 않은 것이 오늘의 전략이었습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_QUIET_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "QUIET"
+    },
+    "text": "가만히 있는 동안 계좌가 앞서 나갔습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_QUIET_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "QUIET"
+    },
+    "text": "손을 아낀 하루가 앞선 하루가 됐습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_PEAKBUY_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "시장과 나란히 걸었고, 한 번 헛디뎠습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_PEAKBUY_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "제자리 같은 하루에 고점 하나가 남았습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_PEAKBUY_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "따라간 하루였고 자국이 하나 있습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_BOTTOMSELL_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "판 자리만 빼면 시장과 같은 하루였습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_BOTTOMSELL_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "나란히 가다 한 번 먼저 내렸습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_BOTTOMSELL_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "제자리 걸음에 놓친 자리가 하나 있습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_OVERTRADE_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "많이 움직였지만 도착한 곳은 같았습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_OVERTRADE_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "손은 바빴고 결과는 시장과 같았습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_OVERTRADE_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "분주했던 하루가 제자리로 돌아왔습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_QUIET_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "QUIET"
+    },
+    "text": "조용한 하루가 시장과 같은 곳에 놓였습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_QUIET_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "QUIET"
+    },
+    "text": "지켜보기만 한 하루였고, 차이도 없었습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_QUIET_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "QUIET"
+    },
+    "text": "가만히 있어도 시장만큼은 갔습니다."
+  },
+  {
+    "id": "HEAD_BELOW_PEAKBUY_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "오늘의 상대는 시장이 아니라 내 손가락이었습니다."
+  },
+  {
+    "id": "HEAD_BELOW_PEAKBUY_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "시장은 앞으로 갔고, 내 손은 뒤로 갔습니다."
+  },
+  {
+    "id": "HEAD_BELOW_PEAKBUY_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "PEAK_BUY"
+    },
+    "text": "높은 자리에서 손이 먼저 나갔습니다."
+  },
+  {
+    "id": "HEAD_BELOW_BOTTOMSELL_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "놓아버린 자리마다 값이 붙었습니다."
+  },
+  {
+    "id": "HEAD_BELOW_BOTTOMSELL_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "먼저 내린 정류장이 오늘의 차이였습니다."
+  },
+  {
+    "id": "HEAD_BELOW_BOTTOMSELL_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "BOTTOM_SELL"
+    },
+    "text": "판 뒤에 올라간 것들이 오늘을 갈랐습니다."
+  },
+  {
+    "id": "HEAD_BELOW_OVERTRADE_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "많이 눌렀고, 눌린 만큼 깎였습니다."
+  },
+  {
+    "id": "HEAD_BELOW_OVERTRADE_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "거래 횟수만 앞선 하루였습니다."
+  },
+  {
+    "id": "HEAD_BELOW_OVERTRADE_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "OVERTRADE"
+    },
+    "text": "손이 쉬지 않았고 계좌는 따라오지 않았습니다."
+  },
+  {
+    "id": "HEAD_BELOW_QUIET_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "QUIET"
+    },
+    "text": "가만히 있었는데도 시장에 뒤처졌습니다."
+  },
+  {
+    "id": "HEAD_BELOW_QUIET_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "QUIET"
+    },
+    "text": "조용한 하루가 뒤처진 하루가 됐습니다."
+  },
+  {
+    "id": "HEAD_BELOW_QUIET_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "QUIET"
+    },
+    "text": "지켜보는 동안 시장이 먼저 갔습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_NORMAL_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "NORMAL"
+    },
+    "text": "무리하지 않은 하루가 앞서 나갔습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_NORMAL_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "NORMAL"
+    },
+    "text": "큰 실수 없이 시장을 앞섰습니다."
+  },
+  {
+    "id": "HEAD_ABOVE_NORMAL_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "ABOVE",
+      "mainMistake": "NORMAL"
+    },
+    "text": "차분한 손이 앞선 결과를 만들었습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_NORMAL_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "NORMAL"
+    },
+    "text": "특별할 것 없는 하루가 시장과 나란했습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_NORMAL_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "NORMAL"
+    },
+    "text": "고르게 거래했고 결과도 시장과 같았습니다."
+  },
+  {
+    "id": "HEAD_SIMILAR_NORMAL_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "SIMILAR",
+      "mainMistake": "NORMAL"
+    },
+    "text": "손이 흔들리지 않았고 자리도 그대로였습니다."
+  },
+  {
+    "id": "HEAD_BELOW_NORMAL_1",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "NORMAL"
+    },
+    "text": "무난하게 거래했지만 시장에 뒤처졌습니다."
+  },
+  {
+    "id": "HEAD_BELOW_NORMAL_2",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "NORMAL"
+    },
+    "text": "큰 실수 없이도 뒤처진 하루입니다."
+  },
+  {
+    "id": "HEAD_BELOW_NORMAL_3",
+    "slot": "daily_headline",
+    "when": {
+      "vsIndex": "BELOW",
+      "mainMistake": "NORMAL"
+    },
+    "text": "손은 차분했고 계좌는 따라가지 못했습니다."
+  },
+  {
+    "id": "HEAD_FALLBACK",
+    "slot": "daily_headline",
+    "when": {},
+    "fallback": true,
+    "text": "오늘의 매매를 되짚어 봅니다."
+  }
+]

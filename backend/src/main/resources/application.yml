@@ -1,0 +1,152 @@
+spring:
+  # 로컬 .env 를 선택적으로 읽는다. 컨테이너에서는 OS 환경변수가 우선한다.
+  config:
+    import: "optional:file:.env[.properties]"
+  application:
+    name: backend
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:ssafydb}
+    username: ${POSTGRES_USER:ssafy}
+    password: ${POSTGRES_PASSWORD:ssafy}
+    hikari:
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:20}
+  flyway:
+    # 테스트 데이터 시드는 플래그가 켜졌을 때만 탐색 위치에 추가된다. 한 번 적용한 뒤 플래그를 끄면
+    # 그 시드가 위치에서 사라지는데, 기본 검증은 이것을 "적용됐는데 파일이 없다"로 보고 기동을 막는다.
+    # 반복 적용 마이그레이션의 부재만 무시한다 — 버전 마이그레이션 검증은 그대로 엄격하다.
+    ignore-migration-patterns: "repeatable:missing"
+  jpa:
+    open-in-view: false
+    hibernate:
+      # 스키마는 Flyway 가 관리하고 Hibernate 는 검증만 한다.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  session:
+    # 유휴 만료만 사용한다 (ADR-0001).
+    timeout: ${SESSION_TIMEOUT:1d}
+    data:
+      redis:
+        # User 별 세션 무효화에 indexed 저장소가 필요하다.
+        # @EnableRedisIndexedHttpSession 사용 시 Boot 의 timeout 자동 설정이 무시된다.
+        repository-type: indexed
+  http:
+    clients:
+      # 사용자 요청 중 실행되는 외부 API 호출의 기본 타임아웃.
+      connect-timeout: 3s
+      read-timeout: 5s
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            # 프록시 환경의 호스트 불일치를 막기 위해 URI 를 고정한다.
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/api/login/oauth2/code/google}
+          # SSAFY 는 OIDC 가 아니다 — discovery 도 ID 토큰도 없어 엔드포인트를 직접 적고,
+          # 사용자 정보는 access token 으로 user-info 를 불러 받는다.
+          ssafy:
+            client-id: ${SSAFY_CLIENT_ID}
+            client-secret: ${SSAFY_CLIENT_SECRET}
+            client-name: SSAFY
+            authorization-grant-type: authorization_code
+            # 토큰 요청은 client_id·client_secret 을 본문에 싣는다 (명세의 요청 본문).
+            client-authentication-method: client_secret_post
+            redirect-uri: ${SSAFY_REDIRECT_URI:http://localhost:8080/api/login/oauth2/code/ssafy}
+            # scope 를 두지 않는다. 인가 코드 요청이 받는 파라미터는 client_id·redirect_uri·
+            # response_type 뿐이고, 동의항목은 SSAFY 콘솔에서 정한다.
+        provider:
+          ssafy:
+            authorization-uri: https://project.ssafy.com/oauth/sso-check
+            token-uri: https://project.ssafy.com/ssafy/oauth2/token
+            user-info-uri: https://project.ssafy.com/ssafy/resources/userInfo
+            # user-info 응답에서 고유 식별자를 담은 키.
+            user-name-attribute: userId
+
+app:
+  replay:
+    # test는 격리 DB에 검증 데이터를 적재하고 ADMIN 재생 조작을 활성화한다.
+    # production은 운영 일정/배속 1이며 기존 시즌의 replay_state 초기화가 선행돼야 한다.
+    mode: ${REPLAY_MODE:disabled}
+    season-id: ${REPLAY_SEASON_ID:1}
+    poll-delay-ms: ${REPLAY_POLL_DELAY_MS:100}
+    fixture:
+      # 검증용 시즌·종목 적재. 실행 환경과 별개 스위치다 — 미설정도 꺼짐이다.
+      enabled: ${REPLAY_FIXTURE_ENABLED:false}
+  base-url: ${APP_BASE_URL:http://localhost:3000}
+  # WebSocket 핸드셰이크를 허용할 출처 목록 (쉼표 구분). 미설정이면 base-url 하나이므로
+  # 지금까지의 동작과 같다. 도메인을 갈아탈 때만 둘을 함께 적는다 — 옛 주소와 새 주소가
+  # 한동안 같이 열려 있어야 이미 열어 둔 탭의 실시간 연결이 끊기지 않는다.
+  # base-url 과 갈라 둔 이유: 저쪽은 OAuth 복귀 주소라 **반드시 하나**여야 한다.
+  allowed-origins: ${APP_ALLOWED_ORIGINS:${app.base-url}}
+  absence:
+    # 부재로 보는 최소 틱 수. 게임 50 거래일이며 실제로 약 30분이다 (기획서 7.5.1).
+    # 재생 페이스가 바뀌면 30분에 해당하는 틱 수도 바뀐다.
+    threshold-ticks: ${ABSENCE_THRESHOLD_TICKS:50}
+  test-support:
+    # 인증 우회 경로의 유일한 스위치. 미설정도 꺼짐이다 (ADR-0003).
+    enabled: ${TEST_SUPPORT_ENABLED:false}
+    # 켜진 상태에서 32자 미만이면 애플리케이션이 기동하지 않는다.
+    api-key: ${TEST_SUPPORT_API_KEY:}
+  report:
+    # 폐장·정산 발표 경계의 AI 문구 생성. 미설정도 켜짐이다 (의미는 .env.example).
+    ai:
+      enabled: ${REPORT_AI_ENABLED:true}
+    benchmark:
+      # 시즌 리포트의 비교 기준선 (기획서 13.3.3 "가만히 있었다면 vs 나").
+      # 종목이 바뀌어도 계약은 그대로라 심볼만 편성값으로 둔다.
+      # 종가를 찾지 못한 기준선은 응답에서 빠지고 "나" 는 항상 남는다.
+      #
+      # **instruments.symbol 은 가상 심볼이다.** 기본값이 실명 티커(QQQ · 069500)였던 탓에
+      # 조회가 한 번도 맞지 않았고, 못 찾은 기준선은 조용히 빠지는 설계라 시즌 리포트에
+      # "나" 한 줄만 나갔다. 두 시즌 모두 이 심볼로 지수 종목을 갖는다 (시즌 1 은 거래 종목,
+      # 시즌 2 는 asset_type=INDEX 인 대리 종목).
+      us-symbol: ${REPORT_BENCHMARK_US_SYMBOL:NQX}
+      kr-symbol: ${REPORT_BENCHMARK_KR_SYMBOL:KTOP}
+  ai:
+    # 복기 문구를 만드는 AI 서비스. 브라우저는 이 주소를 직접 부르지 않는다 — 폐장 정산 뒤
+    # 백엔드만 호출하고, 결과 문구는 백엔드가 저장한다.
+    base-url: ${AI_BASE_URL:http://localhost:8000}
+    # 내부 호출 키. 미설정이면 호출이 401 로 실패하고 리포트는 문구 없이 공개된다.
+    internal-api-key: ${AI_INTERNAL_API_KEY:}
+    # AI 에 보내는 본문을 로그에 한 번 남긴다. **평소에는 끈다** — 계좌 수백이면 한 줄이
+    # 수백 KB 다. AI 의 성향 참조 사분위 표를 실데이터로 만들려면 리허설 시즌 집계 한 벌이
+    # 필요해서, 그때만 켜서 받고 끄는 용도다 (AI 업무요청서 2026-09-18 요청 ①).
+    #   docker logs a605-dev-backend 2>&1 | grep "AI payload dump" > season-payload.json
+    dump-payload: ${AI_DUMP_PAYLOAD:false}
+    # 시장 수익률을 대신할 종목. 게임 유니버스에 지수 자체가 없어 대리 종목의 그 일차
+    # 첫 거래일 대비 마지막 거래일 종가로 계산한다 (데이터 계약 5-1 은 아직 미결이다).
+    index-proxy-symbol: ${AI_INDEX_PROXY_SYMBOL:NQX}
+
+# 지표·헬스만 연다. 스크레이프는 a605-net 내부의 Prometheus 가 컨테이너 이름으로 붙고,
+# nginx 는 /actuator 를 프록시하지 않으므로 바깥에서는 닿지 않는다 (infra/prometheus.yml 주석).
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: backend
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+scalar:
+  enabled: true
+  url: /v3/api-docs
+  path: /scalar
+  theme: deepSpace
+  layout: modern
+
+logging:
+  level:
+    root: info
+    com.ssafy.a605.backend: debug

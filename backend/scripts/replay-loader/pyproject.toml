@@ -1,0 +1,13 @@
+[project]
+name = "replay-loader"
+version = "0.1.0"
+description = "market-replay 원본 CSV·parquet 을 실제 DB 스키마에 맞춰 적재/롤백하는 검증 스크립트"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg[binary]>=3.2",
+    "pyarrow>=18.0",
+]
+
+# 배포 가능한 패키지가 아니라 실행용 스크립트 모음이다 (ai/pyproject.toml 과 같은 이유).
+[tool.uv]
+package = false

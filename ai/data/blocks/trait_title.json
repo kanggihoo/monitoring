@@ -1,0 +1,189 @@
+[
+  {
+    "id": "TRAIT_INVESTED_H_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "INVESTED",
+      "traitDirection": "H"
+    },
+    "text": "가진 것을 많이 넣은 편이었습니다"
+  },
+  {
+    "id": "TRAIT_INVESTED_H_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "INVESTED",
+      "traitDirection": "H"
+    },
+    "text": "현금을 덜 남긴 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_INVESTED_L_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "INVESTED",
+      "traitDirection": "L"
+    },
+    "text": "지킬 몫을 넉넉히 남긴 편이었습니다"
+  },
+  {
+    "id": "TRAIT_INVESTED_L_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "INVESTED",
+      "traitDirection": "L"
+    },
+    "text": "현금을 많이 두신 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_DRAWDOWN_H_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DRAWDOWN",
+      "traitDirection": "H"
+    },
+    "text": "큰 하락을 안고 가신 편이었습니다"
+  },
+  {
+    "id": "TRAIT_DRAWDOWN_H_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DRAWDOWN",
+      "traitDirection": "H"
+    },
+    "text": "흔들려도 자리를 지킨 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_DRAWDOWN_L_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DRAWDOWN",
+      "traitDirection": "L"
+    },
+    "text": "깊이 빠지기 전에 움직인 편이었습니다"
+  },
+  {
+    "id": "TRAIT_DRAWDOWN_L_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DRAWDOWN",
+      "traitDirection": "L"
+    },
+    "text": "크게 흔들리지 않은 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_ENTRY_H_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "ENTRY",
+      "traitDirection": "H"
+    },
+    "text": "오른 자리에서도 담은 편이었습니다"
+  },
+  {
+    "id": "TRAIT_ENTRY_H_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "ENTRY",
+      "traitDirection": "H"
+    },
+    "text": "오르는 흐름을 따라간 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_ENTRY_L_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "ENTRY",
+      "traitDirection": "L"
+    },
+    "text": "빠진 자리를 노린 편이었습니다"
+  },
+  {
+    "id": "TRAIT_ENTRY_L_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "ENTRY",
+      "traitDirection": "L"
+    },
+    "text": "충분히 내린 뒤에 들어간 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_DIP_H_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DIP",
+      "traitDirection": "H"
+    },
+    "text": "떨어질 때 더 담은 편이었습니다"
+  },
+  {
+    "id": "TRAIT_DIP_H_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DIP",
+      "traitDirection": "H"
+    },
+    "text": "급락을 기회로 보신 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_DIP_L_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DIP",
+      "traitDirection": "L"
+    },
+    "text": "떨어질 때 덜어낸 편이었습니다"
+  },
+  {
+    "id": "TRAIT_DIP_L_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "DIP",
+      "traitDirection": "L"
+    },
+    "text": "급락에서 발을 빼신 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_STOP_H_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "STOP",
+      "traitDirection": "H"
+    },
+    "text": "손실을 오래 안고 가신 편이었습니다"
+  },
+  {
+    "id": "TRAIT_STOP_H_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "STOP",
+      "traitDirection": "H"
+    },
+    "text": "돌아올 때까지 기다리신 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_STOP_L_1",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "STOP",
+      "traitDirection": "L"
+    },
+    "text": "손실을 빨리 끊은 편이었습니다"
+  },
+  {
+    "id": "TRAIT_STOP_L_2",
+    "slot": "trait_title",
+    "when": {
+      "traitItem": "STOP",
+      "traitDirection": "L"
+    },
+    "text": "물러설 때를 아신 쪽이었습니다"
+  },
+  {
+    "id": "TRAIT_FALLBACK",
+    "slot": "trait_title",
+    "when": {},
+    "fallback": true,
+    "text": "아직 습관이 드러나지 않았습니다"
+  }
+]

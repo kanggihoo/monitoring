@@ -1,0 +1,87 @@
+# 로컬 실행용 스택. 값은 .env 에서 읽고, 없으면 아래 기본값으로 동작한다.
+# 변수 이름은 backend/.env.example · application.yml 과 동일하다.
+#
+#   docker compose up -d                  # DB·Redis 만 (기본. 앱은 ./gradlew bootRun)
+#   docker compose --profile app up -d --build   # 앱까지 컨테이너로
+#
+# 주의: `docker compose down` 은 profile 이 붙은 app 을 지우지 않는다.
+# app 까지 띄웠다면 `docker compose --profile app down` 으로 내린다.
+name: a605-backend
+
+services:
+  postgres:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ssafydb}
+      POSTGRES_USER: ${POSTGRES_USER:-ssafy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ssafy}
+    ports:
+      # 호스트 포트만 바꿀 수 있게 한다. 컨테이너 안은 항상 5432.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      # app 이 depends_on 으로 이 상태를 기다린다. 없으면 Flyway 가
+      # DB 기동 전에 붙으려다 실패한다.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ssafy} -d ${POSTGRES_DB:-ssafydb}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  redis:
+    image: redis:7.4.11-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  app:
+    # 기본 up 에서는 뜨지 않는다. 평소 개발은 docs/usage.md 대로
+    # DB·Redis 만 컨테이너로 띄우고 Spring 은 ./gradlew bootRun 으로 돌린다.
+    # 이 서비스는 배포 이미지 검증·전체 스택 재현용이다.
+    profiles: ["app"]
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # 컨테이너 네트워크 기준 값이다. 호스트에 매핑된 포트가 아니라
+      # 서비스 이름과 내부 포트를 쓴다.
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-ssafydb}
+      POSTGRES_USER: ${POSTGRES_USER:-ssafy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ssafy}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # 비어 있으면 앱이 기동하지 않는다. .env 에 채워야 한다.
+      # 기본값을 빈 문자열로 둬서 DB·Redis 만 띄울 때 compose 가 경고하지 않게 한다.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8080/api/login/oauth2/code/google}
+      SSAFY_CLIENT_ID: ${SSAFY_CLIENT_ID:-}
+      SSAFY_CLIENT_SECRET: ${SSAFY_CLIENT_SECRET:-}
+      SSAFY_REDIRECT_URI: ${SSAFY_REDIRECT_URI:-http://localhost:8080/api/login/oauth2/code/ssafy}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      SESSION_TIMEOUT: ${SESSION_TIMEOUT:-1d}
+      # 인증 우회 경로의 스위치. 기본값 false 를 여기에도 적어 .env 누락이 곧 꺼짐이 되게 한다.
+      TEST_SUPPORT_ENABLED: ${TEST_SUPPORT_ENABLED:-false}
+      TEST_SUPPORT_API_KEY: ${TEST_SUPPORT_API_KEY:-}
+      # 진행할 시즌. 시즌 전환이 이 값의 변경과 재기동이므로, 여기서 넘기지 않으면
+      # 컨테이너로 띄운 앱이 .env 를 고쳐도 계속 시즌 1 을 서비스한다.
+      REPLAY_SEASON_ID: ${REPLAY_SEASON_ID:-1}
+      REPLAY_MODE: ${REPLAY_MODE:-production}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
+volumes:
+  postgres-data:
+  redis-data:

@@ -1,0 +1,169 @@
+[
+  {
+    "id": "EFFECT_WORKED_1",
+    "slot": "type_effect",
+    "when": {
+      "axis": "WORKED"
+    },
+    "text": "적게 움직인 쪽이 맞았습니다. 기다린 끝에 {returnRate}로 마무리했습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_1",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "requires": [
+      "rankRate"
+    ],
+    "text": "기다리는 동안 장이 먼저 지나갔습니다. {returnRate}로 {rankRate}에 머물렀습니다."
+  },
+  {
+    "id": "EFFECT_WORKED_2",
+    "slot": "type_effect",
+    "when": {
+      "axis": "WORKED"
+    },
+    "minCount": 3,
+    "text": "쉼 없이 갈아탄 끝에 {returnRate}로 마무리했습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_2",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "손이 자주 나갔지만 결과는 {rankRate}에 머물렀습니다."
+  },
+  {
+    "id": "EFFECT_WORKED_3",
+    "slot": "type_effect",
+    "when": {
+      "axis": "WORKED"
+    },
+    "minCount": 3,
+    "text": "손대지 않고 버틴 자리가 {returnRate}로 돌아왔습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_3",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "내려놓지 않은 자리가 회복되지 않아 {rankRate}에 머물렀습니다."
+  },
+  {
+    "id": "EFFECT_WORKED_4",
+    "slot": "type_effect",
+    "when": {
+      "axis": "WORKED"
+    },
+    "minCount": 3,
+    "text": "먼저 정리한 덕에 {returnRate}로 지켜냈고, 이익으로 끝난 매도도 {winCount}회 있었습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_4",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "낮은 자리에서 끊은 매도가 쌓여 {returnRate}, {rankRate}로 끝났습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_5",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "일찍 거둔 자리 뒤로 장이 더 갔고, 결과는 {rankRate}였습니다."
+  },
+  {
+    "id": "EFFECT_WORKED_5",
+    "slot": "type_effect",
+    "when": {
+      "axis": "WORKED"
+    },
+    "minCount": 3,
+    "text": "빨리 정리하는 습관이 {returnRate}를 지켰고, 이익으로 끝난 매도는 {winCount}회였습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_6",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "작은 하락마다 손을 뗀 결과가 {rankRate}입니다."
+  },
+  {
+    "id": "EFFECT_WORKED_6",
+    "slot": "type_effect",
+    "when": {
+      "axis": "WORKED"
+    },
+    "minCount": 3,
+    "text": "작게 여러 번 거뒀고, 이익으로 끝난 매도가 {winCount}회였습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_7",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "빨리 챙긴 이익들이 {rankRate}를 넘기지 못했습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_8",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "높은 자리에서 담은 몫이 무거워 {rankRate}에 머물렀습니다."
+  },
+  {
+    "id": "EFFECT_BACKFIRED_9",
+    "slot": "type_effect",
+    "when": {
+      "axis": "BACKFIRED"
+    },
+    "minCount": 3,
+    "requires": [
+      "rankRate"
+    ],
+    "text": "먼저 들어간 자리가 회복되지 않아 {rankRate}에 머물렀습니다."
+  },
+  {
+    "id": "EFFECT_FALLBACK",
+    "slot": "type_effect",
+    "when": {},
+    "text": "방식을 가늠하기에는 거래가 많지 않았습니다.",
+    "fallback": true
+  }
+]

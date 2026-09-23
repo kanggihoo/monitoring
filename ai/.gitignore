@@ -1,0 +1,44 @@
+# ai 컨텍스트 전용. 비밀값(.env)·IDE·OS 파일은 리포 루트 .gitignore 가 담당한다.
+# uv.lock 은 반드시 커밋한다 (팀원 간 의존성 버전을 고정하는 유일한 장치).
+
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+### 가상환경 ###
+.venv/
+venv/
+env/
+ENV/
+
+### 도구 캐시 ###
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+### 커버리지 ###
+.coverage
+.coverage.*
+htmlcov/
+
+### 모델 가중치 — 절대 커밋 금지 ###
+# 수백 MB~수십 GB 라 리포가 망가진다. 로컬 경로(AI_MODEL_DIR)나 S3·HuggingFace Hub 에서 받는다.
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.gguf
+*.ggml
+*.h5
+*.pkl
+*.joblib
+*.tflite
+models/weights/
+checkpoints/
+
+### 모델·데이터 캐시 ###
+.cache/
+*.hf_cache/

@@ -1,0 +1,12 @@
+# 자동 생성물 — 포맷 대상이 아니다.
+pnpm-lock.yaml
+.next
+out
+storybook-static
+coverage
+test-results
+playwright-report
+
+# 바이너리·정적 자산
+public
+src/fonts

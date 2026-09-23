@@ -1,0 +1,81 @@
+[
+  {
+    "id": "CTX_UP_1",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "UP"
+    },
+    "text": "지수가 꾸준히 오른 구간이라"
+  },
+  {
+    "id": "CTX_UP_2",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "UP"
+    },
+    "text": "시장이 반등을 이어간 구간이라"
+  },
+  {
+    "id": "CTX_UP_3",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "UP"
+    },
+    "text": "오르는 자리가 많았던 구간이라"
+  },
+  {
+    "id": "CTX_FLAT_1",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "FLAT"
+    },
+    "text": "지수가 크게 움직이지 않은 구간이라"
+  },
+  {
+    "id": "CTX_FLAT_2",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "FLAT"
+    },
+    "text": "시장이 방향을 잡지 못한 구간이라"
+  },
+  {
+    "id": "CTX_FLAT_3",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "FLAT"
+    },
+    "text": "오르내림이 서로를 지운 구간이라"
+  },
+  {
+    "id": "CTX_DOWN_1",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "DOWN"
+    },
+    "text": "지수가 크게 밀린 구간이라"
+  },
+  {
+    "id": "CTX_DOWN_2",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "DOWN"
+    },
+    "text": "시장이 내리막을 걸은 구간이라"
+  },
+  {
+    "id": "CTX_DOWN_3",
+    "slot": "season_context",
+    "when": {
+      "marketMove": "DOWN"
+    },
+    "text": "떨어지는 자리가 많았던 구간이라"
+  },
+  {
+    "id": "CTX_FALLBACK",
+    "slot": "season_context",
+    "when": {},
+    "fallback": true,
+    "text": "지금 지나온 구간에서"
+  }
+]

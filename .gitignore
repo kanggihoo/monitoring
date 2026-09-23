@@ -1,0 +1,18 @@
+# 비밀값 — 예시 파일만 커밋한다
+.env
+.env.*
+!.env.example
+
+# OS · IDE
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# backend 빌드 산출물
+backend/build/
+backend/bin/
+backend/.gradle/
+
+# 운영 DB 덤프 — 개인정보가 들어 있을 수 있다
+data/prod_dump.sql

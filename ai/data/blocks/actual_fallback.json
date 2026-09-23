@@ -1,0 +1,73 @@
+[
+  {
+    "id": "ACTUAL_HIGH_1",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": "SAME"
+    },
+    "text": "지금까지의 거래는 스스로 보셨던 모습과 대체로 같은 쪽을 가리켰습니다. 생각하신 대로 손이 움직였습니다."
+  },
+  {
+    "id": "ACTUAL_HIGH_2",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": "SAME"
+    },
+    "text": "스스로 보신 모습과 실제 거래가 크게 어긋나지 않았습니다. 자기 습관을 잘 알고 계셨습니다."
+  },
+  {
+    "id": "ACTUAL_MID_1",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": "NEAR"
+    },
+    "text": "지금까지의 거래는 스스로 보셨던 모습과 일부는 같고 일부는 달랐습니다. 갈린 자리가 여기까지의 기록입니다."
+  },
+  {
+    "id": "ACTUAL_MID_2",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": "NEAR"
+    },
+    "text": "생각하신 쪽과 실제가 절반쯤 겹쳤습니다. 어긋난 자리가 더 많은 것을 말해 줍니다."
+  },
+  {
+    "id": "ACTUAL_LOW_1",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": "FAR"
+    },
+    "text": "지금까지의 거래는 스스로 보셨던 모습과 여러 곳에서 달랐습니다. 장이 사람의 손을 바꾸기도 합니다."
+  },
+  {
+    "id": "ACTUAL_LOW_2",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": "FAR"
+    },
+    "text": "생각하신 쪽과 실제가 꽤 달랐습니다. 여기까지만 놓고 보면 그랬습니다."
+  },
+  {
+    "id": "ACTUAL_NONE_1",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": null
+    },
+    "text": "지금까지의 거래에는 방향이 분명한 자리가 있었습니다. 위 막대가 그 자리를 가리킵니다."
+  },
+  {
+    "id": "ACTUAL_NONE_2",
+    "slot": "actual_fallback",
+    "when": {
+      "profileMatch": null
+    },
+    "text": "여기까지 손이 한쪽으로 움직인 자리가 있었습니다. 그것이 지금까지의 기록입니다."
+  },
+  {
+    "id": "ACTUAL_FALLBACK",
+    "slot": "actual_fallback",
+    "when": {},
+    "fallback": true,
+    "text": "지금까지의 거래를 한 줄로 줄이면 위 막대가 가리키는 쪽이었습니다."
+  }
+]

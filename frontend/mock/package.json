@@ -1,0 +1,4 @@
+{
+  "//": "목 디렉터리만 ES 모듈로 표시한다. 루트 package.json 에 type:module 을 박으면 output:standalone 이 생성하는 CommonJS server.js 가 깨진다. 원장(src/lib)은 이 범위 밖이라 pnpm mock 이 해당 경고만 끈다.",
+  "type": "module"
+}

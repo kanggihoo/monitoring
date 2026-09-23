@@ -1,0 +1,265 @@
+/*
+ * 생성 파일 — 직접 수정하지 마세요.
+ * 값은 frontend/DESIGN.md 에 있습니다. 고친 뒤 `pnpm theme` 으로 다시 생성하세요.
+ * 여기서 직접 고친 내용은 다음 생성 때 사라집니다.
+ *   배경: frontend/docs/adr/0002-design-md-token-pipeline.md
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* 기본값은 OS 설정이다. `.light` / `.dark` 를 얹으면 그쪽이 이긴다 — 스토리북이 툴바로
+   테마를 강제할 때 쓴다 (그게 없으면 다크 OS 를 쓰는 사람에게 라이트 스토리가 다크로 뜬다). */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light *)) {
+      @slot;
+    }
+  }
+  &:is(.dark *) {
+    @slot;
+  }
+}
+
+:root {
+  --background: #f8f9fa;
+  --foreground: #14171a;
+  --card: #ffffff;
+  --card-foreground: #14171a;
+  --popover: #ffffff;
+  --popover-foreground: #14171a;
+  --primary: #14171a;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f2;
+  --secondary-foreground: #14171a;
+  --muted: #f2f4f6;
+  --muted-foreground: #6b727b;
+  --accent: #e5e8ed;
+  --accent-foreground: #14171a;
+  --destructive: #c2410c;
+  --destructive-foreground: #ffffff;
+  --border: #e2e5e9;
+  --border-strong: #c7ccd3;
+  --input: #e2e5e9;
+  --ring: #c7ccd3;
+  --destructive-surface: #fdf2ec;
+  --foreground-subtle: #464c54;
+  --surface-raised: #ffffff;
+  --surface-feature: #14171a;
+  --surface-feature-foreground: #ffffff;
+  --price-up: #d0333f;
+  --price-up-surface: #fef7f8;
+  --price-down: #2464cc;
+  --price-down-surface: #f4f8fe;
+  --order-buy: #d0333f;
+  --order-sell: #2464cc;
+  --award-mark: #ffe100;
+  --signal-good: #15803d;
+  --signal-fair: #6b727b;
+  --signal-caution: #c2410c;
+  --sidebar: #eef0f2;
+  --sidebar-foreground: #464c54;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #14171a;
+  --sidebar-border: #e2e5e9;
+  --chart-line: #14171a;
+  --chart-grid: #f2f4f6;
+  --radius: 8px;
+  /* 스크롤바·리사이즈 손잡이 같은 브라우저 기본 UI 도 함께 따라오게 한다. */
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0c0e11;
+    --foreground: #f2f4f6;
+    --card: #1d2126;
+    --card-foreground: #f2f4f6;
+    --popover: #1d2126;
+    --popover-foreground: #f2f4f6;
+    --primary: #f2f4f6;
+    --primary-foreground: #14171a;
+    --secondary: #15181c;
+    --secondary-foreground: #f2f4f6;
+    --muted: #262b31;
+    --muted-foreground: #939ba5;
+    --accent: #2f353d;
+    --accent-foreground: #f2f4f6;
+    --destructive: #f0913c;
+    --destructive-foreground: #14171a;
+    --border: #2e343b;
+    --border-strong: #454c55;
+    --input: #2e343b;
+    --ring: #454c55;
+    --destructive-surface: #3a2617;
+    --foreground-subtle: #bac1c9;
+    --surface-raised: #333a42;
+    --surface-feature: #1d2126;
+    --surface-feature-foreground: #f2f4f6;
+    --price-up: #ff5c68;
+    --price-up-surface: #3a1f23;
+    --price-down: #5b9bff;
+    --price-down-surface: #1b2740;
+    --order-buy: #ff5c68;
+    --order-sell: #5b9bff;
+    --award-mark: #f2f4f6;
+    --signal-good: #4ade80;
+    --signal-fair: #939ba5;
+    --signal-caution: #f0913c;
+    --sidebar: #15181c;
+    --sidebar-foreground: #bac1c9;
+    --sidebar-accent: #1d2126;
+    --sidebar-accent-foreground: #f2f4f6;
+    --sidebar-border: #2e343b;
+    --chart-line: #f2f4f6;
+    --chart-grid: #262b31;
+    color-scheme: dark;
+  }
+}
+
+.dark {
+  --background: #0c0e11;
+  --foreground: #f2f4f6;
+  --card: #1d2126;
+  --card-foreground: #f2f4f6;
+  --popover: #1d2126;
+  --popover-foreground: #f2f4f6;
+  --primary: #f2f4f6;
+  --primary-foreground: #14171a;
+  --secondary: #15181c;
+  --secondary-foreground: #f2f4f6;
+  --muted: #262b31;
+  --muted-foreground: #939ba5;
+  --accent: #2f353d;
+  --accent-foreground: #f2f4f6;
+  --destructive: #f0913c;
+  --destructive-foreground: #14171a;
+  --border: #2e343b;
+  --border-strong: #454c55;
+  --input: #2e343b;
+  --ring: #454c55;
+  --destructive-surface: #3a2617;
+  --foreground-subtle: #bac1c9;
+  --surface-raised: #333a42;
+  --surface-feature: #1d2126;
+  --surface-feature-foreground: #f2f4f6;
+  --price-up: #ff5c68;
+  --price-up-surface: #3a1f23;
+  --price-down: #5b9bff;
+  --price-down-surface: #1b2740;
+  --order-buy: #ff5c68;
+  --order-sell: #5b9bff;
+  --award-mark: #f2f4f6;
+  --signal-good: #4ade80;
+  --signal-fair: #939ba5;
+  --signal-caution: #f0913c;
+  --sidebar: #15181c;
+  --sidebar-foreground: #bac1c9;
+  --sidebar-accent: #1d2126;
+  --sidebar-accent-foreground: #f2f4f6;
+  --sidebar-border: #2e343b;
+  --chart-line: #f2f4f6;
+  --chart-grid: #262b31;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-feature: var(--surface-feature);
+  --color-surface-feature-foreground: var(--surface-feature-foreground);
+  --color-price-up: var(--price-up);
+  --color-price-up-surface: var(--price-up-surface);
+  --color-price-down: var(--price-down);
+  --color-price-down-surface: var(--price-down-surface);
+  --color-order-buy: var(--order-buy);
+  --color-order-sell: var(--order-sell);
+  --color-award-mark: var(--award-mark);
+  --color-signal-good: var(--signal-good);
+  --color-signal-fair: var(--signal-fair);
+  --color-signal-caution: var(--signal-caution);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-chart-line: var(--chart-line);
+  --color-chart-grid: var(--chart-grid);
+
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1.4;
+  --text-2xs--letter-spacing: 0.01em;
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 1.4;
+  --text-xs--letter-spacing: 0.01em;
+  --text-sm: 0.75rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.5;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.125rem;
+  --text-xl--line-height: 1.4;
+  --text-xl--letter-spacing: -0.01em;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.3;
+  --text-2xl--letter-spacing: -0.01em;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 1.25;
+  --text-3xl--letter-spacing: -0.02em;
+  --text-4xl: 2.125rem;
+  --text-4xl--line-height: 1.2;
+  --text-4xl--letter-spacing: -0.02em;
+
+  --radius-none: 0px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    /* 루트 배율은 건드리지 않는다 (브라우저 기본 100%).
+       한때 110% 로 키웠으나(S15P21A605-249), 디스플레이 배율이 높은 쪽에서는 화면을
+       90% 로 줄여야 볼 수 있을 만큼 커졌다(S15P21A605-263). 한 값으로 두 요구를 다
+       맞출 수 없어 기본으로 되돌린다 — 크기 선택은 사용자에게 맡길 일이다.
+       타이포 토큰과 Tailwind 여백은 rem 그대로 둔다. 배율을 다시 조정할 일이 생기면
+       여기 한 줄이면 되고, px 로 바꾸면 그 레버를 잃는다. */
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Pretendard 의 기본 숫자는 비례폭이다. 켜지 않으면 시세가 갱신될 때마다
+       숫자가 좌우로 흔들린다 (일봉 하나가 29초인 화면에서는 읽기를 방해한다). */
+    font-variant-numeric: tabular-nums;
+  }
+}

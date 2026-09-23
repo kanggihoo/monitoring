@@ -1,0 +1,115 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.ssafy.a605'
+version = '0.0.1-SNAPSHOT'
+description = 'backend'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0'
+    implementation 'com.scalar.maven:scalar:0.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // /actuator/prometheus 를 낸다. Hikari · JVM · HTTP 서버 지표가 여기 실린다 (infra/prometheus.yml 의 backend 잡).
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+      testImplementation 'org.springframework.boot:spring-boot-starter-websocket-test'
+    // Flyway 10 부터 DB별 모듈이 분리됐다. 없으면 기동 시
+    // "no database found to handle jdbc:postgresql" 로 실패한다.
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-session-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // lombok 은 annotationProcessor 가 있어야 코드를 생성한다.
+    // implementation 만 두면 컴파일은 통과하지만 getter/생성자가 만들어지지 않는다.
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-restclient-test'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.springframework.boot:spring-boot-starter-websocket-test'
+     
+    testImplementation 'org.springframework.boot:spring-boot-starter-session-data-redis-test'
+
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 단위 테스트와 컨테이너 테스트를 분리한다.
+//
+// 기본 test 는 Docker 없이 돌아야 한다 — 회귀 테스트와 CI 기본 단계가 이것을 쓴다.
+// Postgres·Redis 가 필요한 테스트에는 @Tag("container") 를 붙인다.
+// 근거는 docs/conventions/code.md 9절.
+//
+// @Tag("slow") 는 벽시계를 실제로 기다리는 소수의 테스트다(현재 1건, 12초). 개발 루프의
+// integrationTest 에서 빼고 slowTest 로 따로 돌린다 — 회귀 가치는 있지만 매 실행에 필요하지
+// 않다. CI 는 slowTest 도 함께 돌려야 한다.
+tasks.named('test') {
+    useJUnitPlatform {
+        excludeTags 'container', 'slow'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform {
+        includeTags 'container'
+        excludeTags 'slow'
+    }
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    shouldRunAfter tasks.named('test')
+    // Gradle 기본값이 512m 인데 그것을 넘겼다. 컨테이너 테스트 62 개가 서로 다른 Spring
+    // 컨텍스트 22 개를 만들고, 그 수가 컨텍스트 캐시 한도(32)보다 작아 하나도 버려지지 않는다
+    // — 22 개가 각각 SessionFactory·커넥션 풀·Tomcat·브로커를 들고 끝까지 살아 있다.
+    //
+    // **임시책이다.** 근본은 컨텍스트 22 개이고, 상당수가 import 하나·속성 하나 차이로 갈려
+    // 있다. 그것을 합치면 메모리와 CI 시간이 함께 줄지만 테스트 62 개를 건드리는 일이라
+    // 따로 다룬다. 컨텍스트가 더 늘면 이 값도 다시 넘는다.
+    maxHeapSize = '2g'
+}
+
+tasks.register('slowTest', Test) {
+    useJUnitPlatform {
+        includeTags 'slow'
+    }
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    shouldRunAfter tasks.named('integrationTest')
+}
+
+tasks.named('javadoc') {
+    options {
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        author = true
+        version = true
+        if (JavaVersion.current().isJava8Compatible()) {
+            addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}
