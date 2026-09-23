@@ -1,0 +1,83 @@
+# 로컬 관측성 학습용 전체 스택.
+#
+#   docker compose up -d                                   # postgres·redis 만
+#   docker compose --profile app up -d --build             # + backend·ai
+#   docker compose --profile app --profile monitoring up -d --build
+#
+# frontend 는 여기 없다. production 빌드는 /api 를 nginx 에 맡기므로 단독 컨테이너로는
+# backend 에 닿지 않는다. 호스트에서 `cd frontend && pnpm dev` 로 띄우면 rewrite 가
+# 127.0.0.1:8080 으로 잇는다. 계측·로그 수집 대상도 아니다.
+#
+# backend/compose.yml 과 포트(5432·6379)가 겹친다. 둘을 동시에 띄우지 않는다.
+# 포트는 브라우저·로컬 도구로 들어갈 것만 127.0.0.1 에 연다.
+name: a605
+
+services:
+  postgres:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: ssafydb
+      POSTGRES_USER: ssafy
+      POSTGRES_PASSWORD: ssafy
+    ports:
+      # backend/scripts/load-replay.sh local 이 localhost:5432 로 적재한다.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ssafy -d ssafydb"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  redis:
+    image: redis:7.4.11-alpine
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  backend:
+    profiles: ["app"]
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # OAuth 비밀값 등은 기존 backend/.env 를 그대로 읽는다. 아래 environment 가 이긴다.
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ssafydb
+      POSTGRES_USER: ssafy
+      POSTGRES_PASSWORD: ssafy
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AI_BASE_URL: http://ai:8000
+      # 비어 있으면 기동하지 않는 OAuth 등록값. 로컬에서는 test-support 로그인을 쓰므로 자리만 채운다.
+      SSAFY_CLIENT_ID: ${SSAFY_CLIENT_ID:-local-unused}
+      SSAFY_CLIENT_SECRET: ${SSAFY_CLIENT_SECRET:-local-unused}
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  ai:
+    profiles: ["app"]
+    build: ./ai
+    env_file:
+      - path: ./ai/.env
+        required: false
+    environment:
+      AI_ENV: local
+    ports:
+      - "127.0.0.1:8000:8000"
+
+volumes:
+  postgres-data:
+  redis-data:

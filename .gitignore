@@ -16,3 +16,6 @@ backend/.gradle/
 
 # 운영 DB 덤프 — 개인정보가 들어 있을 수 있다
 data/prod_dump.sql
+
+# 파이썬 캐시
+__pycache__/
