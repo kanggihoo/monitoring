@@ -49,13 +49,25 @@ services:
       timeout: 3s
       retries: 12
 
+  # OTel Java agent jar 를 볼륨에 복사하고 끝난다. backend 이미지·Dockerfile 은 건드리지 않는다.
+  otel-agent:
+    profiles: ["app"]
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.31.1
+    command: ["cp", "/javaagent.jar", "/otel/javaagent.jar"]
+    volumes:
+      - otel-agent:/otel
+
   backend:
     profiles: ["app"]
     build: ./backend
     logging: *logging
     labels:
       logging.collect: "true"
+    volumes:
+      - otel-agent:/otel:ro
     depends_on:
+      otel-agent:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -78,6 +90,15 @@ services:
       SSAFY_CLIENT_SECRET: ${SSAFY_CLIENT_SECRET:-local-unused}
       # 콘솔 로그를 한 줄 JSON 으로. 필드 이름은 ai 의 JsonFormatter 와 같다.
       LOGGING_STRUCTURED_FORMAT_CONSOLE: logstash
+      # 트레이스만 agent 로 낸다. 메트릭은 기존 Micrometer(/actuator/prometheus), 로그는 stdout.
+      # agent 가 MDC 에 trace_id·span_id 를 넣고, logstash 포맷이 MDC 를 필드로 싣는다.
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/javaagent.jar
+      OTEL_SERVICE_NAME: backend
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=local
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     ports:
       - "127.0.0.1:8080:8080"
 
@@ -93,6 +114,18 @@ services:
     environment:
       AI_ENV: local
       AI_LOG_FORMAT: json
+      OTEL_SERVICE_NAME: ai
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=local
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      # 로그 레코드에 otelTraceID·otelSpanID 를 붙인다 → JsonFormatter 가 trace_id·span_id 로 싣는다.
+      OTEL_PYTHON_LOG_CORRELATION: "true"
+      OTEL_PYTHON_FASTAPI_EXCLUDED_URLS: health
+    # 이미지 CMD 앞에 opentelemetry-instrument 만 붙인다. 개발(uv run)은 계측 없이 그대로다.
+    command: ["opentelemetry-instrument", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "127.0.0.1:8000:8000"
 
@@ -123,7 +156,7 @@ services:
     volumes:
       - ./infra/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - alloy-data:/var/lib/alloy/data
-    depends_on: [socket-proxy, loki]
+    depends_on: [socket-proxy, loki, tempo]
     ports:
       - "127.0.0.1:12345:12345"
 
@@ -135,6 +168,15 @@ services:
     volumes:
       - ./infra/loki/config.yaml:/etc/loki/config.yaml:ro
       - loki-data:/loki
+
+  tempo:
+    profiles: ["monitoring"]
+    image: grafana/tempo:2.9.5
+    logging: *logging
+    command: -config.file=/etc/tempo/config.yaml
+    volumes:
+      - ./infra/tempo/config.yaml:/etc/tempo/config.yaml:ro
+      - tempo-data:/var/tempo
 
   grafana:
     profiles: ["monitoring"]
@@ -158,4 +200,6 @@ volumes:
   redis-data:
   alloy-data:
   loki-data:
+  tempo-data:
+  otel-agent:
   grafana-data:

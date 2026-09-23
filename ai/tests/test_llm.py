@@ -232,3 +232,24 @@ async def test_usage_difference_gives_one_batch() -> None:
     assert (batch.calls, batch.prompt_tokens, batch.completion_tokens) == (1, 10, 5)
     # 앞서 뜬 사본은 뒤의 호출에 흔들리지 않는다.
     assert before.calls == 1
+
+
+async def test_complete_records_llm_call_span(monkeypatch) -> None:
+    """모델호출_트레이스_llm.call span 에 모델과 토큰 수를 싣는다"""
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    exporter = InMemorySpanExporter()
+    provider = TracerProvider()
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    monkeypatch.setattr(llm_module, "_tracer", provider.get_tracer("test"))
+    body = {**completion("한 문장."), "usage": {"prompt_tokens": 12, "completion_tokens": 3}}
+
+    await client_with(lambda request: httpx2.Response(200, json=body)).complete("지침", "판정")
+
+    (span,) = exporter.get_finished_spans()
+    assert span.name == "llm.call"
+    assert span.attributes["gen_ai.request.model"] == "gpt-5-mini"
+    assert span.attributes["gen_ai.usage.input_tokens"] == 12
+    assert span.attributes["gen_ai.usage.output_tokens"] == 3

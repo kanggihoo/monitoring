@@ -18,6 +18,7 @@ from typing import Any
 
 import httpx2
 from fastapi import Request
+from opentelemetry import trace
 
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -70,6 +71,11 @@ class LlmUsage:
             f" · 출력 {self.completion_tokens:,}"
             f", 그중 추론 {self.reasoning_tokens:,})"
         )
+
+
+#: httpx2 는 OTel 자동 계측 대상이 아니라 게이트웨이 호출이 트레이스에서 비어 보인다.
+#: 여기만 손으로 잰다. SDK 없이(uv run) 돌면 no-op 이다.
+_tracer = trace.get_tracer(__name__)
 
 
 def _usage_of(data: dict[str, Any]) -> tuple[int, int, int]:
@@ -192,9 +198,15 @@ class LlmClient:
         except TimeoutError as exc:
             raise LlmError(f"동시 호출 자리를 {wait}초 안에 받지 못했습니다.") from exc
         try:
-            data = await self._post_with_retry(
-                client, payload, request_timeout=request_timeout, retry=retry
-            )
+            # 재시도까지 한 span 이다. 예외는 span 에 기록되고 상태가 ERROR 가 된다.
+            with _tracer.start_as_current_span("llm.call", kind=trace.SpanKind.CLIENT) as span:
+                span.set_attribute("gen_ai.request.model", settings.llm_model)
+                data = await self._post_with_retry(
+                    client, payload, request_timeout=request_timeout, retry=retry
+                )
+                prompt, completion, _ = _usage_of(data)
+                span.set_attribute("gen_ai.usage.input_tokens", prompt)
+                span.set_attribute("gen_ai.usage.output_tokens", completion)
         except LlmError:
             self._count(failed=True)
             raise
