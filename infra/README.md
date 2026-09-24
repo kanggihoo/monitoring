@@ -95,6 +95,7 @@ docker compose --profile app --profile monitoring up -d --build
 | 로그에서 트레이스로 | 위 결과의 줄을 펼친 뒤 `trace_id` 옆의 **Tempo 에서 보기** |
 | 트레이스 검색 | Grafana → Explore → Tempo → TraceQL `{resource.service.name="backend" && kind=server}` |
 | 트레이스에서 로그로 | 트레이스의 span을 펼친 뒤 **Logs for this span** |
+| backend→ai로 이어진 트레이스 | TraceQL `{resource.service.name="backend"} >> {resource.service.name="ai"}` (폐장 때 리포트 호출. 폴링 → executor → ai로 한 트레이스) |
 | 헬스체크 로그를 몇 줄 버렸나 | `curl -s 127.0.0.1:12345/metrics \| grep dropped_lines` |
 | tail sampling 판정 수 | `curl -s 127.0.0.1:12345/metrics \| grep count_traces_sampled` |
 
@@ -110,5 +111,4 @@ docker compose --profile monitoring restart grafana   # provisioning 을 고쳤�
 ## 4. 알려진 한계
 
 - **frontend는 스택 밖에 있다.** 호스트에서 `cd frontend && pnpm dev`로 띄운다. 이유는 `../compose.yml` 머리 주석에 있다.
-- **backend→ai 트레이스 전파는 아직 확인하지 못했다.** backend가 ai를 부르는 것은 폐장 때 리포트를 만들 때뿐이다.
 - **메트릭에서 트레이스로 가는 exemplar 링크는 아직 없다.** Tempo metrics-generator 단계에서 추가한다. 이유는 ADR 0001에 있다.
