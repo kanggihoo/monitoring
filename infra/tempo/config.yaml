@@ -1,10 +1,21 @@
-# 단일 바이너리 + 로컬 파일시스템. Alloy 만 여기로 보낸다 (앱은 Alloy:4318 로).
+# ═══════════════════════════════════════════════════════════════════════════════
+# Tempo 설정 — 트레이스 저장소. Alloy 가 OTLP gRPC(:4317)로 보내고, Grafana 가 :3200 으로 묻는다.
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Tempo 는 트레이스를 trace ID 로 찾는 데 최적화돼 있다 (색인을 거의 두지 않고 블록에 쌓는다).
+# 속성으로 찾는 검색은 TraceQL:  {resource.service.name="backend" && span.http.route="/api/v1/…"}
+#
+# Loki 와 같은 구성이다 — 단일 바이너리(distributor·ingester·querier·compactor 한 프로세스) +
+# 로컬 디스크(tempo-data 볼륨). 앱은 여기로 직접 보내지 않는다 (앱 → Alloy:4318 → 여기).
+
+# Grafana 가 검색 결과를 스트리밍으로 받게 한다 (HTTP 위 gRPC 스트림).
 stream_over_http_enabled: true
 
 server:
-  http_listen_port: 3200
+  http_listen_port: 3200 # 조회 API. Grafana 데이터소스 url 이 여기
   log_level: warn
 
+# 수신 담당. 받을 프로토콜만 연다 — Alloy 가 gRPC 로 보낸다.
 distributor:
   receivers:
     otlp:
@@ -12,6 +23,7 @@ distributor:
         grpc:
           endpoint: 0.0.0.0:4317
 
+# 블록을 합치고 보관 기간이 지난 것을 지운다.
 compactor:
   compaction:
     block_retention: 168h # 7일
@@ -19,10 +31,14 @@ compactor:
 storage:
   trace:
     backend: local
+    # 받은 span 은 먼저 WAL(쓰기 전 로그)에 적고, 모이면 블록으로 굽는다. 재기동해도 WAL 에서 복구한다.
     wal:
       path: /var/tempo/wal
     local:
       path: /var/tempo/blocks
+
+# metrics-generator(span → RED 메트릭·서비스 그래프)는 다음 단계에서 켠다 (ADR 0001).
+# 기동 로그의 "metrics-generator is not configured" 경고는 그래서 정상이다.
 
 usage_report:
   reporting_enabled: false

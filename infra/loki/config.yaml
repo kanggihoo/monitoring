@@ -1,38 +1,56 @@
-# 단일 바이너리(-target=all) + 로컬 파일시스템. 로컬 학습용 최소 구성.
+# ═══════════════════════════════════════════════════════════════════════════════
+# Loki 설정 — 로그 저장소. Alloy 가 push 하고(/loki/api/v1/push), Grafana 가 LogQL 로 묻는다.
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Loki 의 핵심 아이디어: **본문은 색인하지 않고 라벨만 색인한다.**
+#   - 라벨 조합 하나 = 스트림 하나. 예) {service="backend", env="local", level="INFO"}
+#   - 같은 스트림의 줄들을 압축해 chunk 로 쌓는다. 검색은 "라벨로 스트림을 고른 뒤 본문을 훑는" 방식.
+#   - 그래서 라벨은 값 종류가 적어야 한다 (라벨 설계는 infra/alloy/config.alloy ② 참고).
+#
+# 이 파일은 단일 바이너리 모드다. Loki 는 원래 distributor(수신)·ingester(메모리에 모아 chunk 로
+# 굽기)·querier(조회)·compactor(정리) 등으로 나눠 여러 대 띄울 수 있지만, 여기서는 한 프로세스가
+# 전부 맡는다 (기본 -target=all). 저장소도 S3 대신 컨테이너 디스크(loki-data 볼륨)다.
+
+# 멀티테넌시 끔. 켜면 요청마다 X-Scope-OrgID 헤더가 필요하다.
 auth_enabled: false
 
 server:
   http_listen_port: 3100
   log_level: warn
 
+# 여러 컴포넌트가 함께 쓰는 기본값.
 common:
-  path_prefix: /loki
-  replication_factor: 1
+  path_prefix: /loki # 볼륨 마운트 지점. 아래 경로들이 전부 이 밑이다
+  replication_factor: 1 # 복제 없음 (인스턴스가 하나뿐)
+  # ring: 분산 모드에서 인스턴스들이 서로를 찾는 해시 링. 하나뿐이니 메모리에 둔다.
   ring:
     kvstore:
       store: inmemory
   storage:
     filesystem:
-      chunks_directory: /loki/chunks
-      rules_directory: /loki/rules
+      chunks_directory: /loki/chunks # 로그 본문(압축된 chunk)
+      rules_directory: /loki/rules # 알림 규칙 (지금은 안 씀)
 
+# 색인 형식. "언제부터(from) 어떤 형식으로" 를 목록으로 쌓는다 — 형식을 바꿀 때는 기존 줄을
+# 고치지 않고 미래 날짜로 새 줄을 추가한다 (과거 데이터는 과거 형식으로 읽어야 하므로).
 schema_config:
   configs:
     - from: 2026-01-01
-      store: tsdb
+      store: tsdb # 색인 저장 방식. Loki 3.x 의 권장값
       object_store: filesystem
-      schema: v13
+      schema: v13 # structured metadata 를 쓰려면 v13 이상이 필요하다
       index:
         prefix: index_
-        period: 24h
+        period: 24h # 색인 파일을 하루 단위로 자른다. retention 이 이 단위로 지운다
 
 limits_config:
-  retention_period: 168h # 7일
+  retention_period: 168h # 7일. 실제 삭제는 아래 compactor 가 한다
   # trace_id·span_id 를 라벨이 아니라 structured metadata 로 받는다.
   allow_structured_metadata: true
-  # Loki 가 자동으로 붙이는 service_name 라벨을 끈다. Alloy 가 service 를 이미 준다.
+  # Loki 3.x 는 service_name 라벨을 자동으로 만들어 붙인다. Alloy 가 service 를 이미 주므로 끈다.
   discover_service_name: []
 
+# 오래된 데이터를 지우고 색인을 합친다. retention_enabled 가 없으면 retention_period 는 무시된다.
 compactor:
   working_directory: /loki/compactor
   retention_enabled: true

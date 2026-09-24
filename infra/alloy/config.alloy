@@ -1,11 +1,43 @@
-// 수집기 하나가 로그·메트릭·트레이스를 모두 받는다. 지금은 로그만.
-// 파이프라인 그림: http://127.0.0.1:12345
+// ═══════════════════════════════════════════════════════════════════════════════
+// Grafana Alloy 설정 — 수집기 하나가 로그·트레이스(·메트릭)를 받아 가공하고 저장소로 보낸다.
+// 파이프라인 그래프(살아 있는 상태 포함): http://127.0.0.1:12345
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// ── 문법 읽는 법 ────────────────────────────────────────────────────────────────
+//
+//   <컴포넌트 종류> "<이름>" { 인자... }
+//
+//   예) loki.write "default" { ... }  →  종류 loki.write, 이름 default 인 컴포넌트 하나
+//
+// 컴포넌트는 **출력(export)** 을 가진다. 다른 컴포넌트가 `<종류>.<이름>.<출력>` 으로 그 값을
+// 참조하면 둘이 연결된다. 이 참조들이 모여 파이프라인(그래프)이 된다 — 파일 안 순서는 무관하다.
+//
+//   discovery.docker.logs.targets        ← "discovery.docker 의 logs 가 찾은 대상 목록"
+//   loki.process.app.receiver            ← "loki.process 의 app 이 받는 입구"
+//   forward_to = [ ...receiver ]         ← 로그를 그 입구로 흘려보낸다 (loki.* 계열)
+//   output { traces = [ ...input ] }     ← 트레이스를 그 입구로 흘려보낸다 (otelcol.* 계열)
+//
+// 계열이 둘이다:
+//   loki.*     로그 전용. Promtail 에서 온 컴포넌트들.
+//   otelcol.*  OpenTelemetry Collector 컴포넌트를 그대로 감싼 것. 트레이스(·메트릭·로그) 용.
+//
+// ── 이 파일의 두 파이프라인 ─────────────────────────────────────────────────────
+//
+//   [로그]   discovery.docker ─targets→ loki.source.docker ─→ loki.process ─→ loki.write ─→ Loki
+//                 └ discovery.relabel (rules) ┘
+//
+//   [트레이스] otelcol.receiver.otlp ─→ tail_sampling ─→ batch ─→ otelcol.exporter.otlp ─→ Tempo
 
-// ── 로그: stdout(JSON) → Docker → socket-proxy → 여기 → Loki ─────────────────
 
-// logging.collect=true 라벨을 단 컨테이너만 가져간다 (수집 선언).
+// ═══ 로그 ════════════════════════════════════════════════════════════════════════
+// stdout(JSON) → Docker(json-file) → socket-proxy → 여기 → Loki
+
+// ① 누구의 로그를 읽을지 찾는다.
+// Docker API 로 컨테이너 목록을 10초마다 받아 온다. 각 컨테이너가 "대상(target)" 하나가 되고,
+// 대상마다 __meta_docker_* 라벨이 붙는다 (컨테이너 이름·compose 서비스 이름·라벨 등).
+// filter 로 logging.collect=true 라벨을 단 컨테이너만 남긴다 — 수집 선언 (CONTEXT.md).
 discovery.docker "logs" {
-  host             = "tcp://socket-proxy:2375"
+  host             = "tcp://socket-proxy:2375" // docker.sock 직접이 아니라 프록시로
   refresh_interval = "10s"
   filter {
     name   = "label"
@@ -13,7 +45,17 @@ discovery.docker "logs" {
   }
 }
 
-// 라벨은 값 종류가 적은 것만 둔다: service(여기) · env(loki.write) · level(loki.process).
+// ② 대상의 메타 라벨을 Loki 라벨로 옮기는 규칙.
+// __ 로 시작하는 라벨은 내부용이라 Loki 까지 가지 않는다. 필요한 것만 이름을 바꿔 남긴다.
+//   __meta_docker_container_label_com_docker_compose_service  (compose 가 붙이는 서비스 이름)
+//     → service="backend" / service="ai"
+//
+// 라벨 설계 원칙: Loki 는 **라벨 조합마다 스트림(=별도 저장 단위)** 을 만든다. 값 종류가 많은
+// 라벨(trace_id, user_id…)을 올리면 스트림이 폭발해 느려진다. 그래서 라벨은
+// service(여기) · env(loki.write) · level(loki.process) 세 개만 둔다.
+//
+// targets = [] 인 이유: 이 컴포넌트는 규칙(rules)만 내보내고, 실제 적용은 아래
+// loki.source.docker 가 relabel_rules 로 한다.
 discovery.relabel "logs" {
   targets = []
   rule {
@@ -22,6 +64,9 @@ discovery.relabel "logs" {
   }
 }
 
+// ③ 로그를 실제로 읽는다.
+// 대상 컨테이너마다 Docker API(/containers/{id}/logs?follow)를 열어 한 줄씩 받는다.
+// 어디까지 읽었는지는 --storage.path(alloy-data 볼륨)에 기록된다.
 loki.source.docker "containers" {
   host          = "tcp://socket-proxy:2375"
   targets       = discovery.docker.logs.targets
@@ -29,24 +74,34 @@ loki.source.docker "containers" {
   forward_to    = [loki.process.app.receiver]
 }
 
+// ④ 한 줄씩 가공한다. stage 는 위에서 아래로 순서대로 실행된다.
 loki.process "app" {
-  // backend(Spring logstash)와 ai(JsonFormatter)가 같은 필드 이름을 쓴다.
+  // 줄을 JSON 으로 파싱해 필드를 "추출값(extracted map)"에 꺼내 둔다. 아직 라벨이 아니다 —
+  // 다음 stage 들이 이 값을 골라 라벨·메타데이터·필터에 쓴다.
+  // backend(Spring logstash)와 ai(JsonFormatter)가 같은 필드 이름을 써서 규칙이 하나로 끝난다.
+  // JSON 이 아닌 줄(JVM 시작 메시지 등)은 추출값 없이 그대로 통과한다.
   stage.json {
     expressions = { level = "", message = "", trace_id = "", span_id = "" }
   }
 
-  // 헬스체크 요청 로그는 버린다 (ai 컨테이너 HEALTHCHECK 가 30초마다 /health 를 부른다).
+  // message 가 정규식에 맞으면 줄을 버린다 → Loki 에 저장되지 않는다.
+  // 헬스체크 요청 로그: ai 컨테이너 HEALTHCHECK 가 30초마다 GET /health 를 부른다.
+  // 버린 수는 Alloy 메트릭 loki_process_dropped_lines_total{reason="healthcheck"} 로 확인한다.
   stage.drop {
     source              = "message"
     expression          = ".*\"GET /(health|actuator)[^\"]*\".*"
     drop_counter_reason = "healthcheck"
   }
 
+  // 추출값 level 을 Loki 라벨로 올린다. 값이 DEBUG·INFO·WARN·ERROR 뿐이라 라벨로 적합하다.
   stage.labels {
     values = { level = "" }
   }
 
-  // 트레이스 ID 는 값 종류가 무한하다 — 라벨로 올리면 스트림이 폭발한다.
+  // trace_id·span_id 는 라벨 대신 structured metadata 로 붙인다.
+  // 라벨처럼 스트림을 나누지 않고 줄마다 딸려 저장되며, LogQL 에서
+  //   {service="backend"} | trace_id="abc..."
+  // 처럼 필터할 수 있다. Grafana 의 "로그 → Tempo" 링크가 이 값을 읽는다.
   stage.structured_metadata {
     values = { trace_id = "", span_id = "" }
   }
@@ -54,6 +109,7 @@ loki.process "app" {
   forward_to = [loki.write.default.receiver]
 }
 
+// ⑤ Loki 로 보낸다 (HTTP push). external_labels 는 여기서 나가는 모든 줄에 붙는다.
 loki.write "default" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
@@ -61,8 +117,12 @@ loki.write "default" {
   external_labels = { env = "local" }
 }
 
-// ── 트레이스: 앱 → OTLP http/protobuf :4318 → tail sampling → batch → Tempo ──────
 
+// ═══ 트레이스 ════════════════════════════════════════════════════════════════════
+// 앱(OTel agent/SDK) → OTLP http/protobuf :4318 → tail sampling → batch → Tempo
+
+// ① OTLP 를 받는다. OTLP 는 OpenTelemetry 의 표준 전송 규격이다 (gRPC :4317 / HTTP :4318).
+// 앱은 compose 에서 OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318 로 여기를 가리킨다.
 otelcol.receiver.otlp "default" {
   http {
     endpoint = "0.0.0.0:4318"
@@ -72,12 +132,20 @@ otelcol.receiver.otlp "default" {
   }
 }
 
-// 정책은 OR 이다 — 하나라도 맞으면 남긴다. 어디에도 안 맞는 것이 빈 폴링 트레이스다:
-// 리플레이 폴러가 100ms 마다 만드는 루트 span 하나짜리 (할 일이 없으면 DB 도 열지 않는다).
+// ② tail sampling — 트레이스가 **끝난 뒤** 전체를 보고 남길지 정한다.
+//   head sampling(앱이 시작 시점에 확률로 결정)은 "에러가 났는지·자식이 있는지"를 모른다.
+//   tail 은 span 을 decision_wait 동안 메모리에 모았다가 트레이스 단위로 판정한다.
+//
+// 정책은 OR 이다 — 하나라도 "남긴다"면 남긴다. 어디에도 안 맞는 것이 빈 폴링 트레이스다
+// (CONTEXT.md): 리플레이 폴러가 100ms 마다 만드는 루트 span 하나짜리로, 할 일이 없으면 DB 도
+// 열지 않고 끝나서 자식이 없다. 실측 약 97% 가 여기서 버려진다.
+// 판정 수: otelcol_processor_tail_sampling_count_traces_sampled_total{policy=…} (Alloy /metrics)
 otelcol.processor.tail_sampling "default" {
-  // 트레이스의 span 이 다 모일 때까지 기다리는 시간. 틱 처리는 100ms 안팎이다.
+  // 트레이스의 span 이 다 모일 때까지 기다리는 시간. 틱 처리는 100ms 안팎이라 넉넉하다.
+  // 이 시간만큼 Tempo 에 늦게 보인다.
   decision_wait = "5s"
 
+  // 에러 span 이 하나라도 있으면 남긴다.
   policy {
     name = "errors"
     type = "status_code"
@@ -86,7 +154,7 @@ otelcol.processor.tail_sampling "default" {
     }
   }
 
-  // 틱 트레이스: 체결·평가·랭킹 리스너의 JDBC·Redis span 이 달린다.
+  // 틱 트레이스: 체결·평가·랭킹 리스너의 JDBC·Redis span 이 자식으로 달린다.
   policy {
     name = "has-children"
     type = "span_count"
@@ -96,6 +164,7 @@ otelcol.processor.tail_sampling "default" {
   }
 
   // API 트레이스는 span 하나여도 남긴다 (401 로 끝난 요청 등).
+  // OTTL(OpenTelemetry Transformation Language) 조건식. SERVER span = 들어온 HTTP 요청.
   policy {
     name = "server-requests"
     type = "ottl_condition"
@@ -110,12 +179,14 @@ otelcol.processor.tail_sampling "default" {
   }
 }
 
+// ③ 모아서 보낸다. span 을 하나씩 보내지 않고 묶어 네트워크 호출 수를 줄인다.
 otelcol.processor.batch "default" {
   output {
     traces = [otelcol.exporter.otlp.tempo.input]
   }
 }
 
+// ④ Tempo 로 보낸다 (OTLP gRPC). 같은 도커 네트워크 안이라 TLS 없이.
 otelcol.exporter.otlp "tempo" {
   client {
     endpoint = "tempo:4317"
