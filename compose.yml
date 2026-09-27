@@ -5,6 +5,7 @@
 #   docker compose up -d                                   # postgres·redis 만
 #   docker compose --profile app up -d --build             # + backend·ai
 #   docker compose --profile app --profile monitoring up -d --build   # + 관측 스택
+#   docker compose --profile load run --rm k6                         # 부하 한 번 (load/README.md)
 #
 # profile 은 "이 서비스는 해당 --profile 을 줄 때만 뜬다"는 표시다. profile 이 없는
 # 서비스(postgres·redis)는 항상 뜬다. 세 층으로 나눠서 필요한 만큼만 띄운다.
@@ -14,6 +15,7 @@
 #   로그     backend·ai ─stdout(JSON)→ Docker(json-file) ←읽기─ socket-proxy ←─ alloy ─push→ loki
 #   트레이스 backend·ai ─OTLP http :4318→ alloy (tail sampling) ─OTLP grpc :4317→ tempo
 #   메트릭   alloy ─scrape→ backend·ai·exporter 의 /metrics ─remote write→ prometheus
+#   부하     k6 ─HTTP→ backend,  k6 ─remote write→ prometheus  (예외: alloy 를 거치지 않는다)
 #   보기     grafana ─query→ loki · tempo · prometheus
 #
 # 앱은 관측 백엔드(loki·tempo·prometheus)의 주소를 모른다. 앱이 아는 것은 alloy 하나뿐이고,
@@ -360,6 +362,32 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /run/docker/containerd/containerd.sock:/run/containerd/containerd.sock:ro
     depends_on: [socket-proxy]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # load — 부하 도구 (up 이 아니라 run 으로 한 번씩 돌린다)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  # k6 는 긁어 갈 대상이 아니라 결과를 밀어 넣는 쪽이라 alloy 를 거치지 않고 Prometheus 에 직접
+  # remote write 한다 (수집 파이프라인의 유일한 예외 경로). 요청 자체는 backend 로 가서 그쪽 로그·
+  # 트레이스·메트릭에 그대로 찍힌다.
+  k6:
+    profiles: ["load"]
+    image: grafana/k6:2.3.0
+    # 시나리오 기본값은 스모크. 다른 파일은 `run --rm k6 run /load/<파일>.js` 로 덮어쓴다.
+    command: ["run", "-o", "experimental-prometheus-rw", "/load/smoke.js"]
+    volumes:
+      - ./load:/load:ro
+    # TEST_SUPPORT_API_KEY 를 backend 와 같은 값으로 받는다 (test-support 로그인 키).
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      BASE_URL: http://backend:8080
+      K6_PROMETHEUS_RW_SERVER_URL: http://prometheus:9090/api/v1/write
+      # 응답시간 같은 Trend 지표를 어떤 통계로 보낼지. community/k6 대시보드가 이 이름들을 읽는다.
+      K6_PROMETHEUS_RW_TREND_STATS: "p(95),p(99),min,max,avg,med"
+      # 실행 하나를 구분하는 라벨. `run --rm -e TESTID=... k6` 로 바꾼다.
+      TESTID: ${TESTID:-smoke}
 
   # 화면. 저장소가 아니라 조회기다 — 데이터는 loki·tempo·prometheus 에 있고, grafana 는 그때그때 묻는다.
   # provisioning/ 아래 파일을 기동 시 읽어 데이터소스·대시보드를 자동 등록한다 → UI 에서 손으로 만들지 않는다.

@@ -9,7 +9,7 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
 ## 1. 한 장 그림
 
 ```
-                    ┌──────────── app profile ─────────────┐
+  k6 (load) ─HTTP─▶ ┌──────────── app profile ─────────────┐
                     │  backend (Spring + OTel Java agent)  │
                     │  ai      (FastAPI + opentelemetry-   │
                     │           instrument)                │
@@ -98,14 +98,19 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
 | community | Redis | 메모리, 명령 수, 키, 연결 |
 | community | Node Exporter Full | OrbStack VM의 CPU, 메모리, 디스크, 네트워크 |
 | community | cadvisor | 컨테이너별 자원. `compose_project=a605`로 거른다 |
+| community | k6 Prometheus | k6 실행 결과. `testid`로 고른다 |
 
 커뮤니티 대시보드에서 비어 보이는 패널은 대부분 이 환경에 없는 값이다. 예를 들어 Jetty 패널(우리는 Tomcat을 쓴다), PG17에서 바뀐 bgwriter 통계, OrbStack VM에 없는 PSI, CPU 제한을 걸지 않은 컨테이너의 cfs 지표가 그렇다.
 
 **대시보드를 고칠 때:** UI에서 편집한 뒤 Save 대신 **Export → Save to file**로 JSON을 받는다. 받은 파일로 `grafana/dashboards/app/`의 파일을 덮어쓰면 30초 안에 반영된다. restart는 필요 없다.
 
-### 이후 (예정)
+### 5단계: 부하를 준다
 
-k6 스모크를 진행한다. 이 문서도 그때 갱신한다.
+| 순서 | 파일 | 볼 것 |
+|---|---|---|
+| 1 | `../compose.yml`의 `k6` 서비스 | `load` profile, `run --rm`으로 한 번씩 실행한다. Prometheus에 직접 remote write한다(유일한 예외 경로) |
+| 2 | `../load/smoke.js` | 시나리오, threshold, `testid` 태그 |
+| 3 | `../load/README.md` | 실행 방법. k6 쪽(클라이언트)과 앱 개요(서버)를 나란히 보는 방법 |
 
 ## 3. 직접 확인하기
 
@@ -120,6 +125,7 @@ docker compose --profile app --profile monitoring up -d --build
 | 보고 싶은 것 | 어디서 |
 |---|---|
 | 전체 요약 | Grafana → Dashboards → app → **앱 개요** |
+| 부하 한 번 주기 | `docker compose --profile load run --rm -e TESTID=smoke-1 k6` → community → **k6 Prometheus** |
 | 파이프라인 그래프, 컴포넌트 상태 | http://127.0.0.1:12345 (Alloy UI) |
 | 로그 | Grafana → Explore → Loki → `{service="backend"} \|= "Replay step"` |
 | 로그에서 트레이스로 | 위 결과의 줄을 펼친 뒤 `trace_id` 옆의 **Tempo 에서 보기** |

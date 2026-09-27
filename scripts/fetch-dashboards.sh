@@ -24,6 +24,7 @@ DASHBOARDS = [
     (763, 6, "redis"),         # Redis Dashboard for redis_exporter 1.x
     (1860, 45, "node"),        # Node Exporter Full — OrbStack VM 의 CPU·메모리·디스크
     (19792, 6, "cadvisor"),    # cadvisor dashboard — compose 프로젝트·컨테이너 이름으로 거른다
+    (19665, 3, "k6"),          # k6 Prometheus (공식) — testid 로 실행을 고른다. load/ 참고
 ]
 
 # Prometheus 데이터소스 uid (infra/grafana/provisioning/datasources/datasources.yaml 에서 고정).

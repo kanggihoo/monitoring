@@ -8,7 +8,8 @@
 |---|---|---|
 | `backend/` | Spring Boot 백엔드 | [backend/AGENTS.md](backend/AGENTS.md) |
 | `frontend/` | Next.js 프론트엔드 | [frontend/AGENTS.md](frontend/AGENTS.md) |
-| `load/` | k6 부하 테스트 (docker) | [load/README.md](load/README.md) · 시나리오 [docs/load/k6-scenarios.md](docs/load/k6-scenarios.md) |
+| `infra/` | 관측성 스택 설정 (Alloy·Loki·Tempo·Prometheus·Grafana, 루트 `compose.yml`) | [infra/README.md](infra/README.md) · 용어 [CONTEXT.md](CONTEXT.md) |
+| `load/` | k6 부하 테스트 (docker) | [load/README.md](load/README.md) |
 
 ---
 
