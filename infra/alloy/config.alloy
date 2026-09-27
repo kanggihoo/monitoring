@@ -17,16 +17,20 @@
 //   forward_to = [ ...receiver ]         ← 로그를 그 입구로 흘려보낸다 (loki.* 계열)
 //   output { traces = [ ...input ] }     ← 트레이스를 그 입구로 흘려보낸다 (otelcol.* 계열)
 //
-// 계열이 둘이다:
-//   loki.*     로그 전용. Promtail 에서 온 컴포넌트들.
-//   otelcol.*  OpenTelemetry Collector 컴포넌트를 그대로 감싼 것. 트레이스(·메트릭·로그) 용.
+// 계열이 셋이다:
+//   loki.*        로그 전용. Promtail 에서 온 컴포넌트들.
+//   prometheus.*  메트릭 전용. Prometheus 의 scrape·remote write 를 그대로 옮긴 것.
+//   otelcol.*     OpenTelemetry Collector 컴포넌트를 그대로 감싼 것. 트레이스(·메트릭·로그) 용.
 //
-// ── 이 파일의 두 파이프라인 ─────────────────────────────────────────────────────
+// ── 이 파일의 세 파이프라인 ─────────────────────────────────────────────────────
 //
 //   [로그]   discovery.docker ─targets→ loki.source.docker ─→ loki.process ─→ loki.write ─→ Loki
 //                 └ discovery.relabel (rules) ┘
 //
 //   [트레이스] otelcol.receiver.otlp ─→ tail_sampling ─→ batch ─→ otelcol.exporter.otlp ─→ Tempo
+//
+//   [메트릭] discovery.docker ─→ discovery.relabel ─→ prometheus.scrape ─→ prometheus.relabel ─→ prometheus.remote_write ─→ Prometheus
+//            prometheus.exporter.self (Alloy 자신) ─→ discovery.relabel ─→ prometheus.scrape ─┘
 
 
 // ═══ 로그 ════════════════════════════════════════════════════════════════════════
@@ -194,4 +198,124 @@ otelcol.exporter.otlp "tempo" {
       insecure = true
     }
   }
+}
+
+
+// ═══ 메트릭 ══════════════════════════════════════════════════════════════════════
+// Alloy 가 긁어서(scrape) → Prometheus 로 밀어 넣는다(remote write). Prometheus 는 직접 긁지 않는다.
+
+// ① 누구를 긁을지 찾는다 — 로그와 같은 방식(수집 선언)이고 라벨 이름만 다르다.
+//   metrics.scrape=true   긁어 가라
+//   metrics.port          몇 번 포트에서 (컨테이너 내부 포트)
+//   metrics.path          어느 경로에서 (없으면 /metrics)
+discovery.docker "metrics" {
+  host             = "tcp://socket-proxy:2375"
+  refresh_interval = "10s"
+  filter {
+    name   = "label"
+    values = ["metrics.scrape=true"]
+  }
+}
+
+// ② 대상 주소·경로·라벨을 만든다.
+// discovery.docker 는 컨테이너가 EXPOSE 한 포트마다 대상을 하나씩 만든다 (__address__ = IP:포트).
+// 그 주소를 버리고 "컨테이너 IP + metrics.port 라벨" 로 다시 쓴다. 포트를 여러 개 EXPOSE 한
+// 컨테이너는 같은 대상이 여러 번 생기지만, __ 라벨이 빠진 뒤에는 라벨이 똑같아서 scrape 가 하나로 합친다.
+discovery.relabel "metrics" {
+  targets = discovery.docker.metrics.targets
+
+  rule {
+    source_labels = ["__meta_docker_network_ip", "__meta_docker_container_label_metrics_port"]
+    separator     = ":"
+    target_label  = "__address__"
+  }
+  // __metrics_path__ 는 scrape 가 읽는 특수 라벨이다. 라벨이 없는 컨테이너는 규칙이 건너뛰어 기본값 /metrics.
+  rule {
+    source_labels = ["__meta_docker_container_label_metrics_path"]
+    regex         = "(.+)"
+    target_label  = "__metrics_path__"
+  }
+  // job·instance 는 Prometheus 관례 라벨이다. 커뮤니티 대시보드가 이 둘로 대상을 고른다.
+  // instance 기본값은 IP:포트라 컨테이너를 다시 만들 때마다 바뀐다 → 서비스 이름으로 고정한다.
+  // service 는 Loki 라벨과 같은 이름·값이다 (로그 ↔ 메트릭을 같은 값으로 거른다).
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "job"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "instance"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+// ③ 긁는다. 15초마다 각 대상의 /metrics(Prometheus 텍스트 형식)를 GET 한다.
+prometheus.scrape "containers" {
+  targets         = discovery.relabel.metrics.output
+  scrape_interval = "15s"
+  forward_to      = [prometheus.relabel.only_this_project.receiver]
+}
+
+// ③-1 긁은 **시계열**을 거른다. discovery.relabel 이 "누구를 긁을지"(대상)를 다룬다면,
+// prometheus.relabel 은 "긁어 온 것 중 무엇을 보낼지"(시계열 하나하나)를 다룬다.
+//
+// cadvisor 는 호스트의 모든 컨테이너를 보여 준다 — 다른 compose 프로젝트 것까지. 이 프로젝트(a605)
+// 것만 남긴다. 조건은 "job 이 cadvisor 인데 프로젝트가 a605 가 아니면 버린다"인데, relabel 정규식
+// (RE2)에는 "~가 아니면"(부정 전방탐색)이 없어서 두 단계로 쓴다:
+//   1) 프로젝트가 a605 면 임시 라벨 __tmp_keep="1" 을 붙인다 (__ 라벨은 저장되지 않는다)
+//   2) job;__tmp_keep 이 "cadvisor;" (표시 없음)이면 버린다
+// 호스트 합계(id="/")처럼 프로젝트 라벨이 없는 cadvisor 시계열도 함께 빠진다 — 호스트 전체는 node-exporter 가 본다.
+prometheus.relabel "only_this_project" {
+  rule {
+    source_labels = ["container_label_com_docker_compose_project"]
+    regex         = "a605"
+    target_label  = "__tmp_keep"
+    replacement   = "1"
+  }
+  rule {
+    source_labels = ["job", "__tmp_keep"]
+    separator     = ";"
+    regex         = "cadvisor;"
+    action        = "drop"
+  }
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// Alloy 자기 자신의 메트릭 — 위에서 본 tail sampling 판정 수·버린 로그 줄 수 등을 Grafana 에서 본다.
+prometheus.exporter.self "alloy" {}
+
+// exporter.self 의 기본 라벨은 job="integrations/self", instance=<컨테이너 호스트명> 이다.
+// 다른 대상과 같은 규칙(job·instance·service = 서비스 이름)으로 맞춘다.
+discovery.relabel "alloy" {
+  targets = prometheus.exporter.self.alloy.targets
+  rule {
+    target_label = "job"
+    replacement  = "alloy"
+  }
+  rule {
+    target_label = "instance"
+    replacement  = "alloy"
+  }
+  rule {
+    target_label = "service"
+    replacement  = "alloy"
+  }
+}
+
+prometheus.scrape "alloy" {
+  targets         = discovery.relabel.alloy.output
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.default.receiver]
+}
+
+// ④ Prometheus 로 보낸다. 긁은 샘플을 WAL(--storage.path)에 적었다가 보내므로 Prometheus 가
+// 잠깐 내려가도 되살아나면 이어서 보낸다.
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+  external_labels = { env = "local" }
 }

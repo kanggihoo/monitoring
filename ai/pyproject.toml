@@ -13,6 +13,7 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-http>=1.44.0",
     "opentelemetry-instrumentation-fastapi==0.65b0",
     "opentelemetry-instrumentation-logging==0.65b0",
+    "prometheus-fastapi-instrumentator==8.1.0",
 ]
 
 # 애플리케이션이므로 배포 가능한 패키지로 빌드하지 않는다 (uv virtual project).

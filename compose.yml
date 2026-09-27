@@ -13,7 +13,7 @@
 #
 #   로그     backend·ai ─stdout(JSON)→ Docker(json-file) ←읽기─ socket-proxy ←─ alloy ─push→ loki
 #   트레이스 backend·ai ─OTLP http :4318→ alloy (tail sampling) ─OTLP grpc :4317→ tempo
-#   메트릭   (4단계) alloy ─scrape→ /actuator/prometheus 등 ─remote write→ prometheus
+#   메트릭   alloy ─scrape→ backend·ai·exporter 의 /metrics ─remote write→ prometheus
 #   보기     grafana ─query→ loki · tempo · prometheus
 #
 # 앱은 관측 백엔드(loki·tempo·prometheus)의 주소를 모른다. 앱이 아는 것은 alloy 하나뿐이고,
@@ -97,9 +97,14 @@ services:
     profiles: ["app"]
     build: ./backend
     logging: *logging
-    # 수집 선언 — alloy 는 이 라벨이 달린 컨테이너의 로그만 가져간다 (CONTEXT.md "수집 선언").
+    # 수집 선언 (CONTEXT.md) — alloy 는 라벨로 대상을 고른다. 수집 대상 목록이 alloy 설정에 없다.
+    #   logging.collect  이 컨테이너의 stdout 을 Loki 로
+    #   metrics.*        이 포트·경로를 15초마다 긁어 Prometheus 로
     labels:
       logging.collect: "true"
+      metrics.scrape: "true"
+      metrics.port: "8080"
+      metrics.path: /actuator/prometheus # Micrometer. JVM·Hikari·HTTP 서버·executor 지표
     volumes:
       - otel-agent:/otel:ro
     depends_on:
@@ -159,6 +164,8 @@ services:
     logging: *logging
     labels:
       logging.collect: "true"
+      metrics.scrape: "true"
+      metrics.port: "8000" # /metrics (prometheus-fastapi-instrumentator)
     env_file:
       - path: ./ai/.env
         required: false
@@ -194,6 +201,7 @@ services:
   # 주지 않고, 이 프록시가 허용한 API 만 통과시킨다. alloy 는 tcp://socket-proxy:2375 로 붙는다.
   #   CONTAINERS=1 → GET /containers/json(목록), /containers/{id}/logs(로그 읽기)
   #   NETWORKS=1   → discovery.docker 가 네트워크 라벨을 계산할 때 조회한다
+  #   INFO=1       → GET /info. cadvisor 가 Docker 데몬 정보를 읽는다
   #   POST=0       → 쓰기(생성·시작·삭제) 전부 거부
   socket-proxy:
     profiles: ["monitoring"]
@@ -202,6 +210,7 @@ services:
     environment:
       CONTAINERS: 1
       NETWORKS: 1
+      INFO: 1
       POST: 0
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -221,7 +230,7 @@ services:
     volumes:
       - ./infra/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - alloy-data:/var/lib/alloy/data
-    depends_on: [socket-proxy, loki, tempo]
+    depends_on: [socket-proxy, loki, tempo, prometheus]
     # 4318(OTLP 수신)은 열지 않는다 — 보내는 쪽(backend·ai)이 같은 네트워크 안에 있다.
     ports:
       - "127.0.0.1:12345:12345"
@@ -245,6 +254,103 @@ services:
     volumes:
       - ./infra/tempo/config.yaml:/etc/tempo/config.yaml:ro
       - tempo-data:/var/tempo
+
+  # 메트릭 저장소. 설정: infra/prometheus/prometheus.yml — 스스로 긁지 않고 받기만 한다.
+  prometheus:
+    profiles: ["monitoring"]
+    image: prom/prometheus:v3.14.0
+    logging: *logging
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      # POST /api/v1/write 를 연다. Alloy(와 6단계의 k6)가 여기로 밀어 넣는다.
+      - --web.enable-remote-write-receiver
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      # Prometheus 자체 UI(쿼리·Status→TSDB). 평소 조회는 grafana 로 한다.
+      - "127.0.0.1:9090:9090"
+
+  # ── exporter: 스스로 /metrics 를 내지 않는 것들을 대신해 지표를 만들어 주는 번역기 ──
+  # 모두 수집 선언(metrics.* 라벨)으로 alloy 에 잡힌다. 로그는 수집하지 않는다.
+
+  # Postgres 에 SQL 로 접속해 pg_stat_* 뷰를 읽고 지표로 바꾼다 (연결 수·트랜잭션·락·캐시 적중률…).
+  postgres-exporter:
+    profiles: ["monitoring"]
+    image: prometheuscommunity/postgres-exporter:v0.20.1
+    logging: *logging
+    labels:
+      metrics.scrape: "true"
+      metrics.port: "9187"
+    environment:
+      DATA_SOURCE_URI: postgres:5432/ssafydb?sslmode=disable
+      DATA_SOURCE_USER: ssafy
+      DATA_SOURCE_PASS: ssafy
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Redis 에 INFO 명령을 보내 지표로 바꾼다 (메모리·명령 수·키 수·연결 수…).
+  # backend 의 Lettuce 클라이언트 지표를 끈 대신(ADR 0001) 서버 관점은 여기서 본다.
+  redis-exporter:
+    profiles: ["monitoring"]
+    image: oliver006/redis_exporter:v1.92.0
+    logging: *logging
+    labels:
+      metrics.scrape: "true"
+      metrics.port: "9121"
+    environment:
+      REDIS_ADDR: redis://redis:6379
+
+  # 호스트(머신) 지표 — CPU·메모리·디스크·네트워크. /proc·/sys 를 읽는다.
+  # macOS 에서는 컨테이너가 OrbStack 의 리눅스 VM 안에서 돈다 → 보이는 것은 맥이 아니라 그 VM 이다.
+  node-exporter:
+    profiles: ["monitoring"]
+    image: prom/node-exporter:v1.12.1
+    logging: *logging
+    labels:
+      metrics.scrape: "true"
+      metrics.port: "9100"
+    command: ["--path.rootfs=/host"]
+    pid: host # 호스트의 프로세스 네임스페이스를 본다 (프로세스 수 등)
+    volumes:
+      - /:/host:ro,rslave
+
+  # 컨테이너별 지표 — CPU·메모리·네트워크·디스크 I/O 를 컨테이너 단위로 (cgroup 을 읽는다).
+  # 컨테이너 이름·라벨은 Docker API 로 알아내는데, docker.sock 대신 socket-proxy 로 묻는다.
+  #
+  # ⚠️ socket-proxy 원칙의 유일한 예외: containerd 소켓을 직접 마운트한다.
+  # 최신 cadvisor 는 컨테이너 cgroup 을 containerd 에 물어 찾는다. 소켓이 없으면 호스트 합계(id="/")
+  # 하나만 나오고 컨테이너별 지표가 전혀 없다. containerd 소켓은 docker.sock 과 같은 전체 권한이다
+  # (`:ro` 는 소켓 API 를 막지 못한다). 우리가 짜는 수집 파이프라인(alloy)이 아니라 검증된 exporter
+  # 하나에만, 외부 포트 없이 준다. 경로는 OrbStack 기준이다 (Docker Desktop 은 /run/containerd/…).
+  #
+  # 호스트의 **모든** 컨테이너가 보인다. 이 프로젝트(a605) 것만 남기는 필터는 alloy 메트릭 ③ 에 있다.
+  cadvisor:
+    profiles: ["monitoring"]
+    image: ghcr.io/google/cadvisor:v0.60.6
+    logging: *logging
+    labels:
+      metrics.scrape: "true"
+      metrics.port: "8080"
+    command:
+      - --docker=tcp://socket-proxy:2375
+      - --docker_only=true # 도커 컨테이너만 (시스템 cgroup 제외)
+      - --housekeeping_interval=15s # 수집 주기와 맞춘다
+      - --store_container_labels=false # 컨테이너 라벨 전부를 지표 라벨로 올리지 않는다 (카디널리티)
+      # 이 둘만 지표 라벨로 올린다 → 서비스 이름으로 보고, 프로젝트 이름으로 다른 프로젝트를 걸러낸다.
+      - --whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project
+    privileged: true # cgroup·/dev/kmsg 접근
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /run/docker/containerd/containerd.sock:/run/containerd/containerd.sock:ro
+    depends_on: [socket-proxy]
 
   # 화면. 저장소가 아니라 조회기다 — 데이터는 loki·tempo·prometheus 에 있고, grafana 는 그때그때 묻는다.
   # provisioning/ 아래 파일을 기동 시 읽어 데이터소스(·대시보드)를 자동 등록한다 → UI 에서 손으로 만들지 않는다.
@@ -275,4 +381,5 @@ volumes:
   alloy-data:
   loki-data:
   tempo-data:
+  prometheus-data:
   grafana-data:

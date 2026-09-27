@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app import __version__
 from app.core.config import Settings, get_settings
@@ -86,6 +87,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_exception_handlers(app)
     app.include_router(root_router)  # GET /health — 접두사 없음
     app.include_router(api_router, prefix=settings.api_prefix)
+
+    # GET /metrics — 요청 수·지연(http_request_duration_seconds 등). 루트 compose 의
+    # Alloy 가 긁어 간다. 헬스체크와 자기 자신은 세지 않는다.
+    # 문서(openapi)에는 싣지 않는다 — 내부 운영용 경로다.
+    # excluded_handlers 는 정규식이다 — 앵커가 없으면 /api/ai/health/internal 까지 걸린다.
+    Instrumentator(excluded_handlers=["^/health$", "^/metrics$"]).instrument(app).expose(
+        app, include_in_schema=False
+    )
     return app
 
 

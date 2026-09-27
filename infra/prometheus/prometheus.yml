@@ -1,0 +1,19 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Prometheus 설정 — 메트릭 저장소. **여기서는 아무것도 긁지 않는다.**
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 보통 Prometheus 는 scrape_configs 에 적힌 대상을 스스로 긁어 온다(pull). 이 스택에서는 그 일을
+# Alloy 가 맡고, Prometheus 는 받기만 한다(remote write 수신 → compose 의
+# --web.enable-remote-write-receiver). 그래서 scrape_configs 가 비어 있다.
+#
+#   Alloy ─POST /api/v1/write→ Prometheus     (backend·ai·exporter 메트릭)
+#   k6    ─POST /api/v1/write→ Prometheus     (6단계. 예외 경로 — k6 는 긁을 대상이 아니라 밀어 넣는 쪽)
+#
+# 이렇게 하면 "무엇을 어떻게 수집하나"가 Alloy 설정 한 곳에 모이고, 로그·트레이스와 같은 구조가 된다.
+# 보관 기간(7일)은 설정 파일이 아니라 compose 의 --storage.tsdb.retention.time 플래그로 준다.
+
+global:
+  # 규칙 평가 주기 (알림 규칙은 아직 없다). 수집 주기는 Alloy 의 scrape_interval 이 정한다.
+  evaluation_interval: 15s
+
+scrape_configs: []

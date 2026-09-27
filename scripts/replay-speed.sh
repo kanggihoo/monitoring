@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # 로컬 스택의 리플레이 배속을 바꾼다. 0 = 정지, 10 이면 틱이 약 3초마다 흐른다.
 #   ./scripts/replay-speed.sh 10
+#   ./scripts/replay-speed.sh 10 1000001   # 그 틱으로 먼저 이동한다 (시즌이 끝났을 때 처음으로 되돌리기)
 # 전제: REPLAY_MODE=test · TEST_SUPPORT_ENABLED=true (backend/.env), 리플레이 적재 완료
 #       (cd backend && ./scripts/load-replay.sh local).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 SPEED="${1:?배속을 준다 (0~100)}"
+SEEK_TICK="${2:-}"
 BASE="${BASE:-http://127.0.0.1:8080}"
 KEY=$(grep '^TEST_SUPPORT_API_KEY=' backend/.env | cut -d= -f2-)
 NAME=k6-0001
@@ -19,6 +21,11 @@ docker compose exec -T postgres psql -U ssafy -d ssafydb -qc \
 TOKEN=$(curl -sf -o /dev/null -c - -X POST "$BASE/api/v1/test-support/login" \
   -H "Content-Type: application/json" -H "X-Test-Support-Key: $KEY" -d "{\"name\":\"$NAME\"}" \
   | awk '$6=="SESSION"{print $7}' | base64 -d)
+
+if [ -n "$SEEK_TICK" ]; then
+  curl -sf -X POST "$BASE/api/v1/admin/replay/seek" -H "X-Auth-Token: $TOKEN" \
+    -H "Content-Type: application/json" -d "{\"tickSeq\":$SEEK_TICK}" >/dev/null
+fi
 
 curl -sf -X PATCH "$BASE/api/v1/admin/replay" -H "X-Auth-Token: $TOKEN" \
   -H "Content-Type: application/json" -d "{\"speed\":$SPEED}"

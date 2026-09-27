@@ -14,14 +14,14 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
                     │  ai      (FastAPI + opentelemetry-   │
                     │           instrument)                │
                     └───┬──────────────┬───────────────┬───┘
-            stdout JSON │   OTLP http  │               │ /actuator/prometheus
-                        ▼   :4318      │               │ (4단계)
+            stdout JSON │   OTLP http  │               │ /metrics (scrape)
+                        ▼   :4318      │               │ + exporter 4종
                   Docker json-file     │               │
                         ▲              │               │
                GET only │              ▼               ▼
                  socket-proxy ◀──── alloy (수집기: 가공·필터·샘플링)
                                    │         │          │
-                          push     │   OTLP  │  remote  │ write (4단계)
+                          push     │   OTLP  │  remote  │ write
                                    ▼   grpc  ▼          ▼
                                  loki      tempo    prometheus
                                    ▲         ▲          ▲
@@ -69,15 +69,25 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
 | 4 | `alloy/config.alloy`의 트레이스 ①~④ | OTLP 수신, **tail sampling**(빈 폴링 트레이스 버리기), batch, Tempo로 전송 |
 | 5 | `tempo/config.yaml` | WAL과 블록, 보관 기간 |
 
-### 3단계: 화면에서 잇는다
+### 화면에서 잇는다
 
 | 순서 | 파일 | 볼 것 |
 |---|---|---|
-| 1 | `grafana/provisioning/datasources/datasources.yaml` | 데이터소스를 파일로 등록하는 이유, uid 고정, 로그→트레이스(`derivedFields`), 트레이스→로그(`tracesToLogsV2`) |
+| 1 | `grafana/provisioning/datasources/datasources.yaml` | 데이터소스를 파일로 등록하는 이유, uid 고정, 로그→트레이스(`derivedFields`), 트레이스→로그(`tracesToLogsV2`), Prometheus의 `timeInterval` |
+
+### 3단계: 메트릭을 따라간다
+
+| 순서 | 파일 | 볼 것 |
+|---|---|---|
+| 1 | `../compose.yml`의 backend와 ai `labels: metrics.*` | 수집 선언. 포트와 경로를 컨테이너가 스스로 밝힌다 |
+| 2 | `../ai/app/main.py`의 `Instrumentator` | ai가 `/metrics`를 내는 방법. `excluded_handlers`가 정규식이라는 함정 |
+| 3 | `../compose.yml`의 exporter 4종 | exporter는 스스로 `/metrics`를 내지 않는 대상(Postgres, Redis, 호스트, 컨테이너)을 대신 번역한다. cadvisor의 containerd 소켓 예외 |
+| 4 | `alloy/config.alloy`의 메트릭 ①~④ | 대상 찾기, 주소와 라벨 만들기(discovery.relabel), 긁기, **시계열 거르기**(prometheus.relabel로 다른 프로젝트 컨테이너 제외), remote write |
+| 5 | `prometheus/prometheus.yml` | 스스로 긁지 않고 받기만 한다(`scrape_configs: []`) |
 
 ### 4단계 이후 (예정)
 
-메트릭(Prometheus, exporter), 대시보드, k6 순서로 진행한다. 이 문서도 단계마다 갱신한다.
+대시보드, k6 순서로 진행한다. 이 문서도 단계마다 갱신한다.
 
 ## 3. 직접 확인하기
 
@@ -86,6 +96,7 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
 ```bash
 docker compose --profile app --profile monitoring up -d --build
 ./scripts/replay-speed.sh 10          # 틱을 흘린다 (약 3초에 한 틱)
+./scripts/replay-speed.sh 10 1000001  # 시즌이 끝났으면 첫 틱으로 되돌린 뒤 흘린다
 ```
 
 | 보고 싶은 것 | 어디서 |
@@ -96,6 +107,9 @@ docker compose --profile app --profile monitoring up -d --build
 | 트레이스 검색 | Grafana → Explore → Tempo → TraceQL `{resource.service.name="backend" && kind=server}` |
 | 트레이스에서 로그로 | 트레이스의 span을 펼친 뒤 **Logs for this span** |
 | backend→ai로 이어진 트레이스 | TraceQL `{resource.service.name="backend"} >> {resource.service.name="ai"}` (폐장 때 리포트 호출. 폴링 → executor → ai로 한 트레이스) |
+| 수집 대상이 살아 있나 | Grafana → Explore → Prometheus → `up` (대상마다 1), 또는 http://127.0.0.1:9090 |
+| 컨테이너별 CPU | `sum by (container_label_com_docker_compose_service) (rate(container_cpu_usage_seconds_total[1m]))` |
+| STOMP 전송 대기열 | `executor_queued_tasks{name="clientOutboundChannelExecutor"}` (쌓이면 팬아웃이 밀린다) |
 | 헬스체크 로그를 몇 줄 버렸나 | `curl -s 127.0.0.1:12345/metrics \| grep dropped_lines` |
 | tail sampling 판정 수 | `curl -s 127.0.0.1:12345/metrics \| grep count_traces_sampled` |
 
@@ -111,4 +125,6 @@ docker compose --profile monitoring restart grafana   # provisioning 을 고쳤�
 ## 4. 알려진 한계
 
 - **frontend는 스택 밖에 있다.** 호스트에서 `cd frontend && pnpm dev`로 띄운다. 이유는 `../compose.yml` 머리 주석에 있다.
+- **cadvisor만 containerd 소켓(전체 권한)을 갖는다.** socket-proxy 원칙의 유일한 예외다. 이유는 `../compose.yml`의 cadvisor 주석에 있다.
+- **node-exporter는 맥이 아니라 OrbStack의 리눅스 VM을 본다.**
 - **메트릭에서 트레이스로 가는 exemplar 링크는 아직 없다.** Tempo metrics-generator 단계에서 추가한다. 이유는 ADR 0001에 있다.

@@ -58,3 +58,12 @@ datasources:
       # 트레이스 화면에 span 관계를 그래프로도 보여 준다.
       nodeGraph:
         enabled: true
+
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    jsonData:
+      # Alloy 의 scrape_interval 과 맞춘다. 패널의 $__rate_interval 계산이 이 값을 쓴다.
+      timeInterval: 15s
