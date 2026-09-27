@@ -14,8 +14,12 @@ backend/build/
 backend/bin/
 backend/.gradle/
 
-# 운영 DB 덤프 — 개인정보가 들어 있을 수 있다
+# 운영 데이터 — 실제 사용자 개인정보(이메일 등)가 들어 있다. 공개 저장소에 올리지 않는다
 data/prod_dump.sql
+data/trader_analysis.html
+data/trader_103_analysis.html
 
 # 파이썬 캐시
 __pycache__/
+
+server-infra/
