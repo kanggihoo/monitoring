@@ -1,0 +1,27 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Grafana 대시보드 provisioning — "이 폴더의 JSON 을 대시보드로 등록하라"는 provider 정의.
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 데이터소스 provisioning(datasources/)은 파일 안에 정의가 다 있지만, 대시보드는 JSON 이 크기 때문에
+# 여기서는 **어디서 읽을지**만 정하고 실제 JSON 은 infra/grafana/dashboards/ 에 둔다.
+# (compose 가 그 폴더를 /etc/grafana/dashboards 에 마운트한다.)
+#
+#   infra/grafana/dashboards/
+#   ├── community/   grafana.com 에서 받은 것 (scripts/fetch-dashboards.sh 가 만든다. 손으로 고치지 않는다)
+#   └── app/         이 프로젝트용으로 직접 만든 것
+#
+# foldersFromFilesStructure: 하위 폴더 이름이 Grafana 의 폴더가 된다 (community · app).
+apiVersion: 1
+
+providers:
+  - name: files
+    type: file
+    # UI 에서 고쳐도 저장되지 않게 한다 — 파일이 진실이다. 고치려면 UI 에서 편집 → Export → JSON 으로
+    # 받아 파일을 덮어쓴다 (app/ 대시보드를 만드는 방법이기도 하다).
+    allowUiUpdates: false
+    disableDeletion: true
+    # 파일이 바뀌면 이 주기로 다시 읽는다 — 대시보드는 restart 없이 반영된다 (데이터소스와 다른 점).
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true

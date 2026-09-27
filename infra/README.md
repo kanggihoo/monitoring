@@ -69,12 +69,6 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
 | 4 | `alloy/config.alloy`의 트레이스 ①~④ | OTLP 수신, **tail sampling**(빈 폴링 트레이스 버리기), batch, Tempo로 전송 |
 | 5 | `tempo/config.yaml` | WAL과 블록, 보관 기간 |
 
-### 화면에서 잇는다
-
-| 순서 | 파일 | 볼 것 |
-|---|---|---|
-| 1 | `grafana/provisioning/datasources/datasources.yaml` | 데이터소스를 파일로 등록하는 이유, uid 고정, 로그→트레이스(`derivedFields`), 트레이스→로그(`tracesToLogsV2`), Prometheus의 `timeInterval` |
-
 ### 3단계: 메트릭을 따라간다
 
 | 순서 | 파일 | 볼 것 |
@@ -85,9 +79,33 @@ backend(Spring)와 ai(FastAPI)를 docker로 띄우고 **로그·트레이스·�
 | 4 | `alloy/config.alloy`의 메트릭 ①~④ | 대상 찾기, 주소와 라벨 만들기(discovery.relabel), 긁기, **시계열 거르기**(prometheus.relabel로 다른 프로젝트 컨테이너 제외), remote write |
 | 5 | `prometheus/prometheus.yml` | 스스로 긁지 않고 받기만 한다(`scrape_configs: []`) |
 
-### 4단계 이후 (예정)
+### 4단계: 화면에서 잇는다
 
-대시보드, k6 순서로 진행한다. 이 문서도 단계마다 갱신한다.
+| 순서 | 파일 | 볼 것 |
+|---|---|---|
+| 1 | `grafana/provisioning/datasources/datasources.yaml` | 데이터소스를 파일로 등록하는 이유, uid 고정, 로그→트레이스(`derivedFields`), 트레이스→로그(`tracesToLogsV2`), Prometheus의 `timeInterval` |
+| 2 | `grafana/provisioning/dashboards/dashboards.yaml` | 대시보드는 "어디서 읽을지"만 정한다. 폴더 구조가 곧 Grafana 폴더다. UI 수정은 저장되지 않는다 |
+| 3 | `../scripts/fetch-dashboards.sh` | 커뮤니티 대시보드를 revision을 고정해 받고 `${DS_…}` 자리표시자를 uid로 바꾸는 이유 |
+| 4 | `grafana/dashboards/app/overview.json` | 직접 만든 앱 개요. 로그에서 숫자를 뽑아 그래프로 그리기(LogQL `unwrap`), `histogram_quantile`, `or vector(0)` |
+
+대시보드 목록 (http://127.0.0.1:3001/dashboards):
+
+| 폴더 | 대시보드 | 무엇을 보나 |
+|---|---|---|
+| app | **앱 개요** | 틱 처리 시간과 지연(로그에서 계산), HTTP 요청·p95·에러, 컨테이너 CPU·메모리, Hikari, Tomcat 스레드, STOMP 대기열, Alloy 파이프라인, WARN·ERROR 로그 |
+| community | JVM (Micrometer) | backend의 힙, GC, 스레드, Hikari, HTTP |
+| community | PostgreSQL Exporter | 트랜잭션, 튜플, 연결, 락 |
+| community | Redis | 메모리, 명령 수, 키, 연결 |
+| community | Node Exporter Full | OrbStack VM의 CPU, 메모리, 디스크, 네트워크 |
+| community | cadvisor | 컨테이너별 자원. `compose_project=a605`로 거른다 |
+
+커뮤니티 대시보드에서 비어 보이는 패널은 대부분 이 환경에 없는 값이다. 예를 들어 Jetty 패널(우리는 Tomcat을 쓴다), PG17에서 바뀐 bgwriter 통계, OrbStack VM에 없는 PSI, CPU 제한을 걸지 않은 컨테이너의 cfs 지표가 그렇다.
+
+**대시보드를 고칠 때:** UI에서 편집한 뒤 Save 대신 **Export → Save to file**로 JSON을 받는다. 받은 파일로 `grafana/dashboards/app/`의 파일을 덮어쓰면 30초 안에 반영된다. restart는 필요 없다.
+
+### 이후 (예정)
+
+k6 스모크를 진행한다. 이 문서도 그때 갱신한다.
 
 ## 3. 직접 확인하기
 
@@ -101,6 +119,7 @@ docker compose --profile app --profile monitoring up -d --build
 
 | 보고 싶은 것 | 어디서 |
 |---|---|
+| 전체 요약 | Grafana → Dashboards → app → **앱 개요** |
 | 파이프라인 그래프, 컴포넌트 상태 | http://127.0.0.1:12345 (Alloy UI) |
 | 로그 | Grafana → Explore → Loki → `{service="backend"} \|= "Replay step"` |
 | 로그에서 트레이스로 | 위 결과의 줄을 펼친 뒤 `trace_id` 옆의 **Tempo 에서 보기** |

@@ -155,6 +155,15 @@ services:
       # 이 자동설정을 빼면 Redis span 이 살아나는 대신 lettuce_* Micrometer 메트릭이 없어진다
       # (ADR 0001 Consequences). Redis 메트릭은 redis_exporter 가 서버 관점에서 낸다.
       SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.data.redis.autoconfigure.observation.LettuceObservationAutoConfiguration
+
+      # ── 메트릭 ──
+      # HTTP 요청 지연을 히스토그램 버킷(_bucket)으로도 낸다. 기본은 _count·_sum·_max 뿐이라 평균·최댓값만
+      # 보이고 p95 를 못 구한다. 버킷이 있으면 histogram_quantile(0.95, …) 로 분위수를 계산한다.
+      # (management.metrics.distribution.percentiles-histogram.http.server.requests=true 와 같다)
+      MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILESHISTOGRAM_HTTP_SERVER_REQUESTS: "true"
+      # Tomcat 스레드 지표(tomcat_threads_busy_threads 등)는 Tomcat 의 MBean 레지스트리가 켜져 있어야 나온다
+      # (Spring Boot 기본값은 꺼짐). 요청 스레드가 포화됐는지 — 부하 분석의 첫 질문 — 를 여기서 본다.
+      SERVER_TOMCAT_MBEANREGISTRY_ENABLED: "true"
     ports:
       - "127.0.0.1:8080:8080"
 
@@ -353,7 +362,7 @@ services:
     depends_on: [socket-proxy]
 
   # 화면. 저장소가 아니라 조회기다 — 데이터는 loki·tempo·prometheus 에 있고, grafana 는 그때그때 묻는다.
-  # provisioning/ 아래 파일을 기동 시 읽어 데이터소스(·대시보드)를 자동 등록한다 → UI 에서 손으로 만들지 않는다.
+  # provisioning/ 아래 파일을 기동 시 읽어 데이터소스·대시보드를 자동 등록한다 → UI 에서 손으로 만들지 않는다.
   grafana:
     profiles: ["monitoring"]
     image: grafana/grafana:13.2.2
@@ -366,6 +375,7 @@ services:
       GF_ANALYTICS_REPORTING_ENABLED: "false"
     volumes:
       - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/etc/grafana/dashboards:ro # provisioning/dashboards 가 여기를 읽는다
       - grafana-data:/var/lib/grafana
     ports:
       # 3000 은 호스트의 frontend(pnpm dev)가 쓴다.

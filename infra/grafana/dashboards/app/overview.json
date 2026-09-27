@@ -1,0 +1,945 @@
+{
+  "uid": "app-overview",
+  "title": "앱 개요",
+  "description": "backend·ai 한 화면 요약. 틱 처리(로그) · HTTP · 자원 · 관측 파이프라인 · 에러 로그.",
+  "tags": [
+    "app"
+  ],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "schemaVersion": 39,
+  "editable": true,
+  "panels": [
+    {
+      "type": "row",
+      "title": "리플레이 — 틱 처리 (backend 로그에서 계산)",
+      "id": 1,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "틱 / 분",
+      "description": "Replay step 로그 줄 수. 배속 10 이면 약 18.\n로그가 곧 지표다 — LogQL count_over_time.",
+      "id": 2,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({service=\"backend\"} |= \"Replay step\" [1m]))",
+          "instant": false
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "틱 처리 시간 (totalMs)",
+      "description": "틱 하나를 커밋하고 리스너(체결·평가·랭킹)까지 끝내는 데 걸린 시간. 로그의 totalMs 를 unwrap 해 분위수를 낸다.\n메트릭이 없는 값도 로그에 숫자로 남기면 이렇게 그래프가 된다.",
+      "id": 3,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 4,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "quantile_over_time(0.5, {service=\"backend\"} |= \"Replay step\" | regexp \"totalMs=(?P<v>\\\\d+)\" | unwrap v [1m]) by (service)",
+          "legendFormat": "p50"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "quantile_over_time(0.95, {service=\"backend\"} |= \"Replay step\" | regexp \"totalMs=(?P<v>\\\\d+)\" | unwrap v [1m]) by (service)",
+          "legendFormat": "p95"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "max_over_time({service=\"backend\"} |= \"Replay step\" | regexp \"totalMs=(?P<v>\\\\d+)\" | unwrap v [1m]) by (service)",
+          "legendFormat": "max"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "틱 지연 (lagMs)",
+      "description": "예정 시각(dueAt) 대비 커밋 시각의 지연. 처리가 틱 간격을 못 따라가면 계속 커진다 (따라잡기).",
+      "id": 4,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 14,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "quantile_over_time(0.95, {service=\"backend\"} |= \"Replay step\" | regexp \"lagMs=(?P<v>\\\\d+)\" | unwrap v [1m]) by (service)",
+          "legendFormat": "p95"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "max_over_time({service=\"backend\"} |= \"Replay step\" | regexp \"lagMs=(?P<v>\\\\d+)\" | unwrap v [1m]) by (service)",
+          "legendFormat": "max"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "HTTP — backend (Micrometer) · ai (instrumentator)",
+      "id": 5,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "backend 요청 수 (uri 별)",
+      "description": "초당 요청 수. actuator 제외.",
+      "id": 6,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (uri) (rate(http_server_requests_seconds_count{job=\"backend\", uri!~\"/actuator.*\"}[$__rate_interval]))",
+          "legendFormat": "{{uri}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "backend p95 지연 (uri 별)",
+      "description": "histogram_quantile 은 _bucket 이 있어야 한다 — compose 의 MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILESHISTOGRAM_… 가 켠다.",
+      "id": 7,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket{job=\"backend\", uri!~\"/actuator.*\"}[$__rate_interval])))",
+          "legendFormat": "{{uri}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "에러 비율",
+      "description": "5xx 응답 / 전체. backend 와 ai.\n5xx 가 한 번도 없으면 분자 시계열 자체가 없어 결과가 비므로 `or vector(0)` 으로 0 을 채운다.",
+      "id": 8,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum(rate(http_server_requests_seconds_count{job=\"backend\", uri!~\"/actuator.*\", status=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_requests_seconds_count{job=\"backend\", uri!~\"/actuator.*\"}[$__rate_interval]))",
+          "legendFormat": "backend"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum(rate(http_requests_total{service=\"ai\", status=\"5xx\"}[$__rate_interval])) or vector(0)) / sum(rate(http_requests_total{service=\"ai\"}[$__rate_interval]))",
+          "legendFormat": "ai"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ai 요청 수 (handler 별)",
+      "description": "폐장 때 backend 가 부르는 리포트 요청이 여기 찍힌다.",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (handler) (rate(http_requests_total{service=\"ai\"}[$__rate_interval]))",
+          "legendFormat": "{{handler}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ai p95 지연 (handler 별)",
+      "description": "LLM 을 켜면 llm.call span 시간이 여기 대부분을 차지한다 (트레이스에서 확인).",
+      "id": 10,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, handler) (rate(http_request_duration_seconds_bucket{service=\"ai\"}[$__rate_interval])))",
+          "legendFormat": "{{handler}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "자원 — 컨테이너 (cadvisor) · 커넥션 풀 · 스레드 · STOMP",
+      "id": 11,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "컨테이너 CPU",
+      "description": "코어 단위 (1 = 한 코어를 꽉 씀). k6 부하 때 누가 CPU 를 먹는지 본다.",
+      "id": 12,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (container_label_com_docker_compose_service) (rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service!=\"\"}[$__rate_interval]))",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "컨테이너 메모리 (working set)",
+      "description": "커널이 회수하기 어려운 메모리. OOM 판단 기준이 되는 값이다.",
+      "id": 13,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (container_label_com_docker_compose_service) (container_memory_working_set_bytes{container_label_com_docker_compose_service!=\"\"})",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Hikari 커넥션 풀",
+      "description": "pending 이 0 보다 크면 커넥션을 기다리는 요청이 있다 (풀 고갈).",
+      "id": 14,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(hikaricp_connections_active{job=\"backend\"})",
+          "legendFormat": "active"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(hikaricp_connections_idle{job=\"backend\"})",
+          "legendFormat": "idle"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(hikaricp_connections_pending{job=\"backend\"})",
+          "legendFormat": "pending"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tomcat 요청 스레드",
+      "description": "busy 가 max 에 닿으면 새 요청이 줄을 선다 (스레드 포화).\ncompose 의 SERVER_TOMCAT_MBEANREGISTRY_ENABLED 가 이 지표를 켠다.",
+      "id": 15,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(tomcat_threads_busy_threads{job=\"backend\"})",
+          "legendFormat": "busy"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(tomcat_threads_current_threads{job=\"backend\"})",
+          "legendFormat": "current"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(tomcat_threads_config_max_threads{job=\"backend\"})",
+          "legendFormat": "max"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "STOMP 채널 대기열",
+      "description": "clientOutbound 가 쌓이면 팬아웃이 따라가지 못한다 (틱을 받는 사용자가 늦어진다).",
+      "id": 16,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "executor_queued_tasks{job=\"backend\", name=~\"clientOutboundChannelExecutor|clientInboundChannelExecutor|brokerChannelExecutor\"}",
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM 힙",
+      "description": "힙 사용량과 최대치. 세부(GC·스레드·클래스)는 community/JVM (Micrometer) 대시보드.",
+      "id": 17,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(jvm_memory_used_bytes{job=\"backend\", area=\"heap\"})",
+          "legendFormat": "heap used"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(jvm_memory_max_bytes{job=\"backend\", area=\"heap\"})",
+          "legendFormat": "heap max"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "관측 파이프라인 — Alloy 자신",
+      "id": 18,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "tail sampling 판정 (트레이스/초)",
+      "description": "not_sampled 대부분이 빈 폴링 트레이스다. sampled 는 틱·API·에러 트레이스.",
+      "id": 19,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 44
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (decision) (rate(otelcol_processor_tail_sampling_global_count_traces_sampled_total{job=\"alloy\"}[$__rate_interval]))",
+          "legendFormat": "{{decision}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "로그 줄 (줄/초)",
+      "description": "Loki 로 보낸 줄과, 헬스체크라서 버린 줄.",
+      "id": 20,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 44
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(loki_write_sent_entries_total{job=\"alloy\"}[$__rate_interval]))",
+          "legendFormat": "sent"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (reason) (rate(loki_process_dropped_lines_total{job=\"alloy\"}[$__rate_interval]))",
+          "legendFormat": "dropped: {{reason}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "로그 — WARN·ERROR",
+      "id": 21,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "panels": []
+    },
+    {
+      "type": "logs",
+      "title": "WARN · ERROR 로그",
+      "id": 22,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "줄을 펼쳐 trace_id 옆 'Tempo 에서 보기' 로 그 요청의 트레이스로 간다.",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{env=\"local\", level=~\"WARN|ERROR\"}"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  }
+}
